@@ -1,4 +1,6 @@
 import React from 'react';
+import CommonHeader from "@/ui/organisms/Common.Header/Common.Header";
+import {Box} from "@mui/material";
 
 /**
  *
@@ -8,9 +10,12 @@ import React from 'react';
  */
 const Send: React.FC<ISend> = (props) => {
   return (
-    <div>
-
-    </div>
+    <>
+      <CommonHeader/>
+      <Box mt={5}>
+        text here
+      </Box>
+    </>
   );
 };
 

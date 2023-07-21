@@ -36,6 +36,7 @@ const Home: React.FC<IHome> = (props) => {
       <Button variant={"contained"}>
         Connect Wallet To Start
       </Button>
+
     </Box>
   );
 };
