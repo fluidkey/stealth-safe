@@ -2,19 +2,24 @@ import Head from 'next/head'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { Web3Button } from '@web3modal/react'
-import {useAccount} from 'wagmi'
+import { useAccount } from 'wagmi'
 import { getSafesForOwner, getSafeInfo } from '@/components/safe/safeApiKit'
 import { useState, ChangeEvent, useEffect } from 'react'
 import { getStealthKeys } from '@/components/umbra/getStealthKeys'
+import { generateSafePrivateKeys } from '@/components/umbra/generateSafeViewKeys'
+import { useEthersSigner } from '@/components/utils/clientToSigner'
+import { Signer } from 'ethers'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
 
   const { address } = useAccount()
+  const signer = useEthersSigner()
   const [safes, setSafes] = useState<string[]>([])
   const [selectedSafe, setSelectedSafe] = useState("")
   const [stealthKeyError, setStealthKeyError] = useState<string>("")
+  const [stealthKeys, setStealthKeys] = useState<string[][]>([[]])
 
   async function getSafes () {
     if (!address) return
@@ -25,21 +30,19 @@ export default function Home() {
 
   async function fetchSafeInfo (safeAddress: string) {
     const safeInfo = await getSafeInfo(safeAddress)
-    console.log(safeInfo)
     const owners = safeInfo.owners
     let safeStealthKeysArray: any = []
     for (let i = 0; i < owners.length; i++) {
       const safeStealthKeys = await getStealthKeys(owners[i]) as any
-      console.log(safeStealthKeys)
       if (safeStealthKeys.error) {
         setStealthKeyError("Make sure all owners have registered their stealth keys.")
         return
       } else {
+        safeStealthKeys["owner"] = owners[i]
         safeStealthKeysArray.push(safeStealthKeys)
       }
     }
-    console.log("stealth keys",safeStealthKeysArray)
-    return safeInfo
+    setStealthKeys(safeStealthKeysArray)
   }
 
   const handleSafeChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -53,6 +56,11 @@ export default function Home() {
       fetchSafeInfo(selectedSafe)
     }
   }, [selectedSafe])
+
+  async function generateSafeKeys () {
+    const safePrivateKeys = await generateSafePrivateKeys(signer as Signer)
+    console.log(safePrivateKeys)
+  }
 
   return (
     <>
@@ -72,6 +80,7 @@ export default function Home() {
           </select>
         }
         {stealthKeyError != "" && <p>{stealthKeyError}</p>}
+        <button onClick={generateSafeKeys}>Generate Safe Keys</button>
       </main>
     </>
   )
