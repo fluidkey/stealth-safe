@@ -45,12 +45,10 @@ export default function Home() {
         safeStealthKeysArray.push(safeStealthKeys)
       }
     }
-    console.log(safeStealthKeysArray)
     setStealthKeys(safeStealthKeysArray)
   }
 
   const handleSafeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    console.log("ping")
     setSelectedSafe(e.target.value)
   }
 
