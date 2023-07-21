@@ -7,7 +7,6 @@ const nextConfig = {
     config.module.rules.push({
       test: /\.tsx?$/,
       include: [dir, /umbra\/umbra-js\/src/],
-      exclude: /node_modules/,
       use: [defaultLoaders.babel],
     });
     

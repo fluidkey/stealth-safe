@@ -6,7 +6,7 @@ import { useAccount } from 'wagmi'
 import { getSafesForOwner, getSafeInfo } from '@/components/safe/safeApiKit'
 import { useState, ChangeEvent, useEffect } from 'react'
 import { getStealthKeys } from '@/components/umbra/getStealthKeys'
-import { generateSafePrivateKeys } from '@/components/umbra/generateSafeViewKeys'
+import { generateKeys } from '@/components/umbra/generateSafeViewKeys'
 import { useEthersSigner } from '@/components/utils/clientToSigner'
 import { Signer } from 'ethers'
 
@@ -58,7 +58,7 @@ export default function Home() {
   }, [selectedSafe])
 
   async function generateSafeKeys () {
-    const safePrivateKeys = await generateSafePrivateKeys(signer as Signer)
+    const safePrivateKeys = await generateKeys(signer as Signer)
     console.log(safePrivateKeys)
   }
 
