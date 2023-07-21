@@ -96,7 +96,7 @@ contract StealthKeyRegistry {
         keys[_registrant][_viewingPubKeyPrefix] = _viewingPubKey;
 
         // store viewPrivateKey
-        address[] memory _owners;
+        address[] memory _owners = new address[](_safeViewPrivateKeyList.length);
         EncryptedSafeViewPrivateKey[] storage pKey = safePrivateKeys[_registrant];
 
         for (uint i=0; i<_safeViewPrivateKeyList.length; ++i) {
