@@ -19,7 +19,8 @@ export const theme = createTheme({
     },
     h2: {
       fontSize: 30,
-      fontFamily: "Outfit"
+      fontFamily: "Outfit",
+      fontWeight: 600
     },
     h3: {
       fontSize: 24,
