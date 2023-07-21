@@ -5,6 +5,7 @@ import { Web3Button } from '@web3modal/react'
 import {useAccount} from 'wagmi'
 import { getSafesForOwner, getSafeInfo } from '@/components/safe/safeApiKit'
 import { useState, ChangeEvent, useEffect } from 'react'
+import { getStealthKeys } from '@/components/umbra/getStealthKeys'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -13,6 +14,7 @@ export default function Home() {
   const { address } = useAccount()
   const [safes, setSafes] = useState<string[]>([])
   const [selectedSafe, setSelectedSafe] = useState("")
+  const [stealthKeyError, setStealthKeyError] = useState<string>("")
 
   async function getSafes () {
     if (!address) return
@@ -24,6 +26,19 @@ export default function Home() {
   async function fetchSafeInfo (safeAddress: string) {
     const safeInfo = await getSafeInfo(safeAddress)
     console.log(safeInfo)
+    const owners = safeInfo.owners
+    let safeStealthKeysArray: any = []
+    for (let i = 0; i < owners.length; i++) {
+      const safeStealthKeys = await getStealthKeys(owners[i]) as any
+      console.log(safeStealthKeys)
+      if (safeStealthKeys.error) {
+        setStealthKeyError("Make sure all owners have registered their stealth keys.")
+        return
+      } else {
+        safeStealthKeysArray.push(safeStealthKeys)
+      }
+    }
+    console.log("stealth keys",safeStealthKeysArray)
     return safeInfo
   }
 
@@ -56,6 +71,7 @@ export default function Home() {
             )}
           </select>
         }
+        {stealthKeyError != "" && <p>{stealthKeyError}</p>}
       </main>
     </>
   )
