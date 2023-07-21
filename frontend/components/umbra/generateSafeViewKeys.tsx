@@ -52,6 +52,7 @@ class UmbraSafe extends Umbra {
 export async function generateKeys(signer: Signer) {
     const provider = signer.provider as ethers.providers.JsonRpcProvider;
     const umbraSafe = new UmbraSafe(provider, 100);
-    const keys = await umbraSafe.generateSafePrivateKeys(signer);
-    return keys;
+    const { viewingKeyPair } = await umbraSafe.generateSafePrivateKeys(signer);
+    const { prefix: viewingPrefix, pubKeyXCoordinate: viewingPubKeyX } = KeyPair.compressPublicKey(viewingKeyPair.publicKeyHex)
+    return { viewingKeyPair: viewingKeyPair, prefix: viewingPrefix, pubKeyXCoordinate: viewingPubKeyX };
 }

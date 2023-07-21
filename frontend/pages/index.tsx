@@ -9,6 +9,8 @@ import { getStealthKeys } from '@/components/umbra/getStealthKeys'
 import { generateKeys } from '@/components/umbra/generateSafeViewKeys'
 import { useEthersSigner } from '@/components/utils/clientToSigner'
 import { Signer } from 'ethers'
+import { encryptPrivateViewKey } from '@/components/eth-crypto/encryptPrivateViewKey'
+import { generateAddress } from '@/components/umbra/generateAddressFromKey'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -39,9 +41,11 @@ export default function Home() {
         return
       } else {
         safeStealthKeys["owner"] = owners[i]
+        safeStealthKeys["address"] = await generateAddress(safeStealthKeys.viewingPublicKey)
         safeStealthKeysArray.push(safeStealthKeys)
       }
     }
+    console.log(safeStealthKeysArray)
     setStealthKeys(safeStealthKeysArray)
   }
 
@@ -58,8 +62,14 @@ export default function Home() {
   }, [selectedSafe])
 
   async function generateSafeKeys () {
-    const safePrivateKeys = await generateKeys(signer as Signer)
-    console.log(safePrivateKeys)
+    const keys = await generateKeys(signer as Signer)
+    for (let i = 0; i < stealthKeys.length; i++) {
+      const pubKeySliced = stealthKeys[i].viewingPublicKey.slice(2)
+      const encryptedKey = await encryptPrivateViewKey(pubKeySliced as string, keys.viewingKeyPair.privateKeyHex as string)
+      stealthKeys[i]["encryptedKey"] = encryptedKey
+    }
+    setStealthKeys(stealthKeys)
+    console.log(stealthKeys)
   }
 
   return (
