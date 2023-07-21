@@ -24,45 +24,47 @@ contract StealthKeyRegistry {
     // ======================================= State variables =======================================
 
     /**
-     * @dev Mapping used to store one secp256k1 curve public key used for
-   * receiving stealth payments. The mapping records one key, the viewing
-   * key, encrypted for the different safe users.
-   * The spending key is not needed, as the spending address is the
-   * Safe account. View key can be set and read via the `setStealthKeys`
+     * @dev Mapping used to store one secp256k1 curve private key used for
+   * decoding available stealth payments. The mapping records the private viewing
+   * key, encrypted for the different safe users, so anyone can see the availability of new incoming payments.
+   * Private view key can be set and read via the `setStealthKeys`
    * and `stealthKey` methods respectively.
    *
    * The mapping associates the safe's address to an array of EncryptedSafeViewPrivateKey.
    * Array contains the owner addresses, with the encrypted view keys of the Safe.
-   *
-   * For more on secp256k1 public keys and prefixes generally, see:
-   * https://github.com/ethereumbook/ethereumbook/blob/develop/04keys-addresses.asciidoc#generating-a-public-key
    */
     mapping(address => EncryptedSafeViewPrivateKey[]) safePrivateKeys;
 
-    mapping(address => mapping(uint256 => uint256)) keys;
-
     /**
-     * @dev We wait until deployment to codify the domain separator because we need the
-   * chainId and the contract address
+     * @dev Mapping used to store one secp256k1 curve public key used for
+   * receiving stealth payments. The mapping records the viewing public
+   * key of the safe.
+   * The spending key is not needed, as the spending address is the
+   * Safe account. View key can be set and read via the `setStealthKeys`
+   * and `stealthKey` methods respectively.
+   *
+   * The mapping associates the safe's address to another mapping, which itself maps
+   * the public key prefix to the actual key. This scheme is used to avoid using an
+   * extra storage slot for the public key prefix. For a given address, the mapping
+   * contains a viewing key at position 2 or 3. See the setter/getter methods for
+   * details of how these map to prefixes.
    */
-    constructor() {
-
-    }
+    mapping(address => mapping(uint256 => uint256)) keys;
 
     // ======================================= Set Keys ===============================================
 
     /**
-     * @notice Sets stealth keys for the caller
+     * @notice Sets stealth view public key for the caller, and the encrypted private keys for all the safe owners
    * @param _viewingPubKeyPrefix Prefix of the viewing public key (2 or 3)
    * @param _viewingPubKey The public key to use for encryption
-   * @param _safeViewKeyList View key of Safe stored encrypted for each safe viewer
+   * @param _safeViewPrivateKeyList Private view key of Safe stored encrypted for each safe viewer
    */
     function setStealthKeys(
         uint256 _viewingPubKeyPrefix,
         uint256 _viewingPubKey,
-        EncryptedSafeViewPrivateKey[] calldata _safeViewKeyList
+        EncryptedSafeViewPrivateKey[] calldata _safeViewPrivateKeyList
     ) external {
-        _setStealthKeys(msg.sender, _viewingPubKeyPrefix, _viewingPubKey, _safeViewKeyList);
+        _setStealthKeys(msg.sender, _viewingPubKeyPrefix, _viewingPubKey, _safeViewPrivateKeyList);
     }
 
     /**
@@ -73,11 +75,11 @@ contract StealthKeyRegistry {
         address _registrant,
         uint256 _viewingPubKeyPrefix,
         uint256 _viewingPubKey,
-        EncryptedSafeViewPrivateKey[] calldata _safeViewKeyList
+        EncryptedSafeViewPrivateKey[] calldata _safeViewPrivateKeyList
     ) internal {
         // TODO check the msg.sender is actually a valid gnosis safe
         require(
-            _safeViewKeyList.length > 0,
+            _safeViewPrivateKeyList.length > 0,
             "StealthSafeKeyRegistry: Invalid Keys lenght"
         );
         require(
@@ -97,13 +99,14 @@ contract StealthKeyRegistry {
         address[] memory _owners;
         EncryptedSafeViewPrivateKey[] storage pKey = safePrivateKeys[_registrant];
 
-        for (uint i=0; i<_safeViewKeyList.length; ++i) {
-            _owners[i] = _safeViewKeyList[i].owner;
+        for (uint i=0; i<_safeViewPrivateKeyList.length; ++i) {
+            _owners[i] = _safeViewPrivateKeyList[i].owner;
             pKey.push(
-                EncryptedSafeViewPrivateKey( _safeViewKeyList[i].encKey, _safeViewKeyList[i].owner)
+                EncryptedSafeViewPrivateKey( _safeViewPrivateKeyList[i].encKey, _safeViewPrivateKeyList[i].owner)
             );
         }
 
+        // emit event that keys were registered for a stealth
         emit StealthSafeKeyChanged(_registrant, _viewingPubKeyPrefix, _viewingPubKey, _owners);
     }
 
@@ -114,7 +117,7 @@ contract StealthKeyRegistry {
    * @param _registrant The address whose keys to lookup.
    * @return viewingPubKeyPrefix Prefix of the viewing public key (2 or 3)
    * @return viewingPubKey The public key to use for encryption
-   * @return safeViewPrivateKeyList Array of view keys
+   * @return safeViewPrivateKeyList Array of view private keys
    */
     function stealthKeys(address _registrant)
     external
