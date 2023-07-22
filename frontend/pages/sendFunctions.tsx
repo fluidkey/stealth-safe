@@ -37,15 +37,16 @@ export default function sendFunctions() {
     }
 
     async function createStealthSafe () {
-        const stealthOwners = stealthData.map((owner: any) => owner.stealthAddress)
+      /*  const stealthOwners = stealthData.map((owner: any) => owner.stealthAddress)
         console.log(stealthOwners)
         const safeAddress = await createSafe(stealthOwners, safeInfo.threshold, signer as Signer)
-        console.log(safeAddress)
-        //const sendToStealth = await send(safeAddress)
+        console.log(safeAddress) */
+        const sendToStealth = await send("0x25F9db15e172B91cA37C7ffbAFEF48Ba63f0938B")
     }
-
+//0x25F9db15e172B91cA37C7ffbAFEF48Ba63f0938B
     async function send(stealthSafe: string) {
-        const tx = await sendPayment(stealthSafe, signer as Signer, stealthData[0].pubKeyXCoordinate, stealthData[0].encryptedRandomNumber.ciphertext, 0.000001)
+        console.log(stealthSafe, signer, stealthData[0].pubKeyXCoordinate, stealthData[0].encryptedRandomNumber.ciphertext)
+        const tx = await sendPayment(stealthSafe, signer as Signer, stealthData[0].pubKeyXCoordinate, stealthData[0].encryptedRandomNumber.ciphertext, 500000000000000000)
         console.log(tx)
     }
 
