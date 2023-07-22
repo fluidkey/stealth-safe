@@ -80,6 +80,8 @@ class UmbraSafe extends Umbra {
         }
         return recipients
       }
+
+    
 }
 
 export async function generateKeys(signer: Signer) {
