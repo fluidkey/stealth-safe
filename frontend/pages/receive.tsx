@@ -8,6 +8,7 @@ import {ReceiveProvider, useReceiveData} from "@/context/ReceiveContext";
 import ReceiveSelectSafe from "@/ui/organisms/Receive.SelectSafe/Receive.SelectSafe";
 import Link from "next/link";
 import ReceiveRegisterSafe from "@/ui/organisms/Receive.RegisterSafe/Receive.RegisterSafe";
+import ReceiveListOfWithdrawals from "@/ui/organisms/Receive.ListOfWithdrawals/Receive.ListOfWithdrawals";
 
 /**
  *
@@ -112,7 +113,7 @@ const Receive: React.FC<IReceive> = (props) => {
         {
           receiveData.isSelectedSafeInitialized ?
             <Box mt={4}>
-              Show table with withdrawals
+              <ReceiveListOfWithdrawals/>
             </Box>
             :
             ""
