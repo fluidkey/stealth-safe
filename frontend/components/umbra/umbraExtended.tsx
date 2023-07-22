@@ -77,30 +77,7 @@ class UmbraSafe extends Umbra {
 
             recipients.push({recipientId: recipientIds[i], stealthKeyPair, pubKeyXCoordinate, encryptedRandomNumber: encrypted, stealthAddress})
         }
-        console.log(recipients)
         return recipients
-      }
-
-      async sendEth(stealthSafe: string, signer: Signer, pubKeyXCoordinate: string, encryptedCiphertext: string, amount: BigNumberish) {
-
-            try {                
-                // Get toll amount from contract.
-                const toll = await this.umbraContract.toll();
-                console.log(toll)
-                // Send transaction.
-                const txSigner = this.getConnectedSigner(signer as any); // signer input validated
-                console.log(txSigner)
-                let tx: ContractTransaction;
-                tx = await this.umbraContract
-                    .connect(txSigner)
-                    .sendEth(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, { value: amount.toString() });
-                console.log(tx)
-                // We do not wait for the transaction to be mined before returning it
-                return tx;
-            } catch (error) {
-                console.error(error);
-                throw error;
-            }
       }
 }
 
@@ -121,51 +98,76 @@ export async function prepareSendToSafe(recipientIds: string[], viewingPubKey: s
 
 export async function sendPayment(stealthSafe: string, signer: Signer, pubKeyXCoordinate: string, encryptedCiphertext: string, amount: number) {
 
-   /* const provider = signer.provider as ethers.providers.JsonRpcProvider;
-    const umbraSafe = new UmbraSafe(provider, 100);
-    const receipt = await umbraSafe.sendEth(stealthSafe, signer, pubKeyXCoordinate, encryptedCiphertext, amount) */
-
-    const abi = [{"inputs":[{"internalType":"uint256","name":"_toll","type":"uint256"},{"internalType":"address","name":"_tollCollector","type":"address"},{"internalType":"address payable","name":"_tollReceiver","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"receiver","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"bytes32","name":"pkx","type":"bytes32"},{"indexed":false,"internalType":"bytes32","name":"ciphertext","type":"bytes32"}],"name":"Announcement","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"receiver","type":"address"},{"indexed":true,"internalType":"address","name":"acceptor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":true,"internalType":"address","name":"token","type":"address"}],"name":"TokenWithdrawal","type":"event"},{"inputs":[],"name":"collectTolls","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address payable","name":"_receiver","type":"address"},{"internalType":"uint256","name":"_tollCommitment","type":"uint256"},{"internalType":"bytes32","name":"_pkx","type":"bytes32"},{"internalType":"bytes32","name":"_ciphertext","type":"bytes32"}],"name":"sendEth","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"_receiver","type":"address"},{"internalType":"address","name":"_tokenAddr","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"},{"internalType":"bytes32","name":"_pkx","type":"bytes32"},{"internalType":"bytes32","name":"_ciphertext","type":"bytes32"}],"name":"sendToken","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_newToll","type":"uint256"}],"name":"setToll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_newTollCollector","type":"address"}],"name":"setTollCollector","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address payable","name":"_newTollReceiver","type":"address"}],"name":"setTollReceiver","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"tokenPayments","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"toll","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"tollCollector","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"tollReceiver","outputs":[{"internalType":"address payable","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_acceptor","type":"address"},{"internalType":"address","name":"_tokenAddr","type":"address"}],"name":"withdrawToken","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_acceptor","type":"address"},{"internalType":"address","name":"_tokenAddr","type":"address"},{"internalType":"contract IUmbraHookReceiver","name":"_hook","type":"address"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"withdrawTokenAndCall","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_stealthAddr","type":"address"},{"internalType":"address","name":"_acceptor","type":"address"},{"internalType":"address","name":"_tokenAddr","type":"address"},{"internalType":"address","name":"_sponsor","type":"address"},{"internalType":"uint256","name":"_sponsorFee","type":"uint256"},{"internalType":"contract IUmbraHookReceiver","name":"_hook","type":"address"},{"internalType":"bytes","name":"_data","type":"bytes"},{"internalType":"uint8","name":"_v","type":"uint8"},{"internalType":"bytes32","name":"_r","type":"bytes32"},{"internalType":"bytes32","name":"_s","type":"bytes32"}],"name":"withdrawTokenAndCallOnBehalf","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_stealthAddr","type":"address"},{"internalType":"address","name":"_acceptor","type":"address"},{"internalType":"address","name":"_tokenAddr","type":"address"},{"internalType":"address","name":"_sponsor","type":"address"},{"internalType":"uint256","name":"_sponsorFee","type":"uint256"},{"internalType":"uint8","name":"_v","type":"uint8"},{"internalType":"bytes32","name":"_r","type":"bytes32"},{"internalType":"bytes32","name":"_s","type":"bytes32"}],"name":"withdrawTokenOnBehalf","outputs":[],"stateMutability":"nonpayable","type":"function"}]
-    const contractAddress = "0xFb2dc580Eed955B528407b4d36FfaFe3da685401"
+    const abi = [
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "receiver",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "token",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "bytes32",
+                    "name": "pkx",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "bytes32",
+                    "name": "ciphertext",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "Announcement",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address payable",
+                    "name": "_receiver",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_tollCommitment",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bytes32",
+                    "name": "_pkx",
+                    "type": "bytes32"
+                },
+                {
+                    "internalType": "bytes32",
+                    "name": "_ciphertext",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "sendEth",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        }
+    ]
+    const contractAddress = "0x95361e14DF30064FF39aE7b19E7aA938D2b1a5d0"
     const contract = new ethers.Contract(contractAddress, abi, signer)
-    const toll = await contract.toll()
-    console.log(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, amount.toString())
-
-    /*const overrides = {
-        value: amount.toString(),
-        gasLimit: 80000,
-        gasPrice: ethers.utils.parseUnits('150', 'gwei').toString(),
-        type: 1,
-        accessList: [
-          {
-            address: stealthSafe, // admin gnosis safe proxy address
-            storageKeys: [
-                "0x0000000000000000000000000000000000000000000000000000000000000000"
-            ]
-          },
-          {
-            address: "0x3E5c63644E683549055b9Be8653de26E0B4CD36E", // proceedsRecipient gnosis safe proxy address
-            storageKeys: []
-          }
-        ]
-      }
-
-    const accessList = accessListify([{address: stealthSafe, storageKeys: ["0x0000000000000000000000000000000000000000000000000000000000000000"]}, {address: "0x3E5c63644E683549055b9Be8653de26E0B4CD36E", storageKeys: []}])
-
-    const sendEth = await contract.populateTransaction.sendEth(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, {value: amount.toString(), accessList: accessList})
-
-    console.log(sendEth)
-    const call = await contract.sendEth(stealthSafe, toll.toString(), pubKeyXCoordinate, encryptedCiphertext, overrides)
-    const receipt = await call.wait() */
-
-    const transaction = {
-        to: contractAddress, // The contract address you want to interact with
-        value: ethers.utils.parseEther('0.11'), // The amount of Ether you want to send with the transaction
-        data: '0xbeb9addf00000000000000000000000025f9db15e172b91ca37c7ffbafef48ba63f0938b00000000000000000000000000000000000000000000000000b1a2bc2ec500005fbed6eeb9d462a1ffd4898a66839dbd5a820ac57dd4a4186b3c5af26115e9eef57bc4776f79fafad254d1652b83975a788956dc323f5f8d4ca6753f694523ec' // The raw, encoded ABI data you want to send
-      };
-
-      const txResponse = await signer.sendTransaction(transaction);
-      const txReceipt = await txResponse.wait();
-      console.log(txReceipt)
-      return txReceipt
+    const call = await contract.sendEth(stealthSafe, "0", pubKeyXCoordinate, encryptedCiphertext, {value: amount.toString()})
+    const receipt = await call.wait() 
+    return receipt
 }
