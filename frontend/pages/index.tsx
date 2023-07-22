@@ -13,7 +13,7 @@ import { encryptPrivateViewKey } from '@/components/eth-crypto/encryptPrivateVie
 import { generateAddress } from '@/components/umbra/generateAddressFromKey'
 import { addSafe, executeTx } from '@/components/safeKeyRegistry/addSafe'
 import safeService from '@/components/safe/safeEthersAdapter'
-import { encryptDecrypt } from '@/components/eth-crypto/test'
+import {encryptDecrypt, encryptDecryptSample} from '@/components/eth-crypto/test'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -51,6 +51,7 @@ export default function Home() {
       }
     }
     setStealthKeys(safeStealthKeysArray)
+    console.log("safeStealthKeysArray", safeStealthKeysArray);
   }
 
   const handleSafeChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -99,12 +100,12 @@ export default function Home() {
         console.log(stealthKeys)
         const pubKeySliced = stealthKeys[i].viewingPublicKey.slice(2)
         console.log(stealthKeys[i])
+        console.log("pubKeySliced, keys.viewingKeyPair.privateKeyHex", pubKeySliced, keys.viewingKeyPair.privateKeyHex, )
         const testData = await encryptDecrypt(pubKeySliced as string, keys.viewingKeyPair.privateKeyHex as string, signer as Signer)
         console.log(testData)
       }
     }
   }
-
 
   return (
     <>
@@ -116,9 +117,9 @@ export default function Home() {
       <main className={`${styles.main} ${inter.className}`}>
         <Web3Button />
         <button onClick={getSafes}>Get Safes</button>
-        {safes.length > 0 && 
+        {safes.length > 0 &&
           <select value={selectedSafe} onChange={handleSafeChange}>
-            {safes.map((safe, index) => 
+            {safes.map((safe, index) =>
               <option key={index} value={safe}>{safe}</option>
             )}
           </select>
@@ -129,6 +130,7 @@ export default function Home() {
         <button onClick={getTransactions}>Get Transactions</button>
         {safeTransactions && <button onClick={executeTransaction}>Execute Transaction</button>}
         <button onClick={test}>Test</button>
+        <button onClick={encryptDecryptSample}>TestSample</button>
       </main>
     </>
   )
