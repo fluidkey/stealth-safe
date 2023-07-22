@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {SafeViewKey, useReceiveData, UserStealthAddress} from "@/context/ReceiveContext";
-import {generateKeys} from "@/components/umbra/generateSafeViewKeys";
 import {Signer} from "ethers";
 import {encryptPrivateViewKey} from "@/components/eth-crypto/encryptPrivateViewKey";
 import {useEthersSigner} from "@/components/utils/clientToSigner";
@@ -22,6 +21,7 @@ import {addSafe} from "@/components/safeKeyRegistry/addSafe";
 import {useRouter} from "next/router";
 import SuccessInitialized from "@/ui/organisms/Receive.RegisterSafe/SuccessInitialized";
 import {RefreshRounded} from "@mui/icons-material";
+import {generateKeys} from "@/components/umbra/umbraExtended";
 
 /**
  *
