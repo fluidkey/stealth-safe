@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {Box, InputAdornment, TextField, Typography} from "@mui/material";
 import {useSendData} from "@/context/SendContext";
+import {useAccount, useBalance} from "wagmi";
 
 /**
  *
@@ -10,9 +11,16 @@ import {useSendData} from "@/context/SendContext";
  */
 const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
   const sendData = useSendData();
+  const account = useAccount();
 
   const [inputType, setInputType] = useState<"address" | "ens" | "invalid">("invalid");
   const [error, setError] = useState<string>("");
+
+  const { data, isError, isLoading } = useBalance({
+    address: account.address
+  })
+
+  console.log(data);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -49,43 +57,55 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
   }
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mt: 3 }}>
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mt: 3 }}>
 
-      <TextField label="Enter recipient address"
-                 variant="standard"
-                 value={sendData.sendTo}
-                 onChange={handleInputChange}
-                 onBlur={handleBlur}
-                 error={!!error}
-                 helperText={error}
-                 sx={{
-                   mt: 3,
-                   width: 300
-                 }}
-      />
+        <TextField label="Enter recipient address"
+                   variant="standard"
+                   value={sendData.sendTo}
+                   onChange={handleInputChange}
+                   onBlur={handleBlur}
+                   error={!!error}
+                   helperText={error}
+                   sx={{
+                     mt: 3,
+                     width: 300
+                   }}
+        />
 
-      <TextField variant="standard"
-                 value={sendData.sendAmount}
-                 onChange={handleAmountChange}
-                 type="number"
-                 InputProps={{
-                   endAdornment: <InputAdornment position="end">xDAI</InputAdornment>,
-                 }}
-                 inputProps={{ min: "0.01", step: "0.01" }}
-                 sx={{
-                   width: 90,
-                   '& input::-webkit-inner-spin-button': {
-                     '-webkit-appearance': 'none',
-                   },
-                   '& input::-webkit-outer-spin-button': {
-                     '-webkit-appearance': 'none',
-                   },
-                   '& input': {
-                     '-moz-appearance': 'textfield',
-                     'text-align': 'right'
-                   },
-                 }}
-      />
+        <TextField variant="standard"
+                   value={sendData.sendAmount}
+                   onChange={handleAmountChange}
+                   type="number"
+                   InputProps={{
+                     endAdornment: <InputAdornment position="end">xDAI</InputAdornment>,
+                   }}
+                   inputProps={{ min: "0.01", step: "0.01" }}
+                   sx={{
+                     width: 90,
+                     '& input::-webkit-inner-spin-button': {
+                       '-webkit-appearance': 'none',
+                     },
+                     '& input::-webkit-outer-spin-button': {
+                       '-webkit-appearance': 'none',
+                     },
+                     '& input': {
+                       '-moz-appearance': 'textfield',
+                       'text-align': 'right'
+                     },
+                   }}
+        />
+      </Box>
+      {
+        data?.formatted ?
+          <Box width={"100%"} textAlign={"right"} mt={0.5}>
+            <Typography fontSize={13}>
+              <strong>Balance:</strong>&nbsp;{parseFloat(data?.formatted).toFixed(2)} xDAI
+            </Typography>
+          </Box>
+          :
+          ""
+      }
     </Box>
   );
 };
