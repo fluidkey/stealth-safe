@@ -11,6 +11,8 @@ import { useEthersSigner } from '@/components/utils/clientToSigner'
 import { Signer } from 'ethers'
 import { encryptPrivateViewKey } from '@/components/eth-crypto/encryptPrivateViewKey'
 import { generateAddress } from '@/components/umbra/generateAddressFromKey'
+import { addSafe, executeTx } from '@/components/safeKeyRegistry/addSafe'
+import safeService from '@/components/safe/safeEthersAdapter'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,6 +24,8 @@ export default function Home() {
   const [selectedSafe, setSelectedSafe] = useState("")
   const [stealthKeyError, setStealthKeyError] = useState<string>("")
   const [stealthKeys, setStealthKeys] = useState<string[][]>([[]])
+  const [sharedSafeViewKey, setSharedSafeViewKey] = useState({})
+  const [safeTransactions, setSafeTransactions] = useState<any>()
 
   async function getSafes () {
     if (!address) return
@@ -64,11 +68,29 @@ export default function Home() {
     for (let i = 0; i < stealthKeys.length; i++) {
       const pubKeySliced = stealthKeys[i].viewingPublicKey.slice(2)
       const encryptedKey = await encryptPrivateViewKey(pubKeySliced as string, keys.viewingKeyPair.privateKeyHex as string)
-      stealthKeys[i]["encryptedKey"] = encryptedKey
+      stealthKeys[i]["encryptedKey"] = "0x"+encryptedKey
     }
+    setSharedSafeViewKey(keys)
     setStealthKeys(stealthKeys)
     console.log(stealthKeys)
   }
+
+  async function submitKeys () {
+    const addToContract = await addSafe(selectedSafe, address as string, sharedSafeViewKey.prefix, sharedSafeViewKey.pubKeyXCoordinate, stealthKeys.map((key) => [key.encryptedKey, key.owner]), signer)
+  }
+
+  async function getTransactions () {
+    const transactions = await safeService.getPendingTransactions(selectedSafe)
+    console.log(transactions)
+    setSafeTransactions(transactions)
+  }
+
+  async function executeTransaction () {
+    console.log(safeTransactions.results[0])
+    const execute = await executeTx(safeTransactions.results[0], signer as Signer, selectedSafe)
+    console.log(execute)
+  }
+
 
   return (
     <>
@@ -89,6 +111,9 @@ export default function Home() {
         }
         {stealthKeyError != "" && <p>{stealthKeyError}</p>}
         <button onClick={generateSafeKeys}>Generate Safe Keys</button>
+        <button onClick={submitKeys}>Submit Keys</button>
+        <button onClick={getTransactions}>Get Transactions</button>
+        {safeTransactions && <button onClick={executeTransaction}>Execute Transaction</button>}
       </main>
     </>
   )
