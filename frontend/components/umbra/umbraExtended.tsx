@@ -1,7 +1,8 @@
 import { Umbra, KeyPair, RandomNumber } from 'umbra/umbra-js/src/';
 import { lookupRecipient } from 'umbra/umbra-js/src/utils/utils';
-import { BigNumberish, Signer, ethers, ContractTransaction } from "ethers"
+import {BigNumberish, Signer, ethers, ContractTransaction, BigNumber} from "ethers"
 import { hexlify, toUtf8Bytes, isHexString, sha256, accessListify } from 'ethers/lib/utils';
+import {UMBRA_SAFE_ABI, UMBRA_SAFE_ADDRESS} from "@/components/Const";
 
 class UmbraSafe extends Umbra {
 // modification of Umbra's generatePrivateKeys function
@@ -97,81 +98,16 @@ export async function prepareSendToSafe(recipientIds: string[], viewingPubKey: s
     return response
 }
 
-export async function sendPayment(stealthSafe: string, signer: Signer, pubKeyXCoordinate: string, encryptedCiphertext: string, amount: number) {
+export async function sendPayment(stealthSafe: string, signer: Signer, pubKeyXCoordinate: string, encryptedCiphertext: string, amount: BigNumber) {
 
-    const abi = [
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "internalType": "address",
-                    "name": "receiver",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "amount",
-                    "type": "uint256"
-                },
-                {
-                    "indexed": true,
-                    "internalType": "address",
-                    "name": "token",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "bytes32",
-                    "name": "pkx",
-                    "type": "bytes32"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "bytes32",
-                    "name": "ciphertext",
-                    "type": "bytes32"
-                }
-            ],
-            "name": "Announcement",
-            "type": "event"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address payable",
-                    "name": "_receiver",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_tollCommitment",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "bytes32",
-                    "name": "_pkx",
-                    "type": "bytes32"
-                },
-                {
-                    "internalType": "bytes32",
-                    "name": "_ciphertext",
-                    "type": "bytes32"
-                }
-            ],
-            "name": "sendEth",
-            "outputs": [],
-            "stateMutability": "payable",
-            "type": "function"
-        }
-    ]
-    const contractAddress = "0x95361e14DF30064FF39aE7b19E7aA938D2b1a5d0"
+    const abi = UMBRA_SAFE_ABI;
+    const contractAddress = UMBRA_SAFE_ADDRESS;
     const contract = new ethers.Contract(contractAddress, abi, signer)
     const call = await contract.sendEth(stealthSafe, "0", pubKeyXCoordinate, encryptedCiphertext, {value: amount.toString()})
     const receipt = await call.wait()
     return receipt
 }
+
 
 export async function getPrivateKeys(signer: Signer) {
     const provider = signer.provider as ethers.providers.JsonRpcProvider;

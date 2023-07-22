@@ -8,6 +8,7 @@ import {ReceiveProvider, useReceiveData} from "@/context/ReceiveContext";
 import ReceiveSelectSafe from "@/ui/organisms/Receive.SelectSafe/Receive.SelectSafe";
 import Link from "next/link";
 import ReceiveRegisterSafe from "@/ui/organisms/Receive.RegisterSafe/Receive.RegisterSafe";
+import ReceiveListOfWithdrawals from "@/ui/organisms/Receive.ListOfWithdrawals/Receive.ListOfWithdrawals";
 
 /**
  *
@@ -57,10 +58,6 @@ const Receive: React.FC<IReceive> = (props) => {
            alignItems="center"
            flexDirection="column"
       >
-        {/* Connected wallet row */}
-        <Box width={"100%"} mt={2} display={"flex"} justifyContent={"center"}>
-          <Web3Button />
-        </Box>
 
         {/* Into of the page */}
         <Typography variant="h2"
@@ -109,6 +106,15 @@ const Receive: React.FC<IReceive> = (props) => {
             <>
               <ReceiveRegisterSafe/>
             </>
+            :
+            ""
+        }
+
+        {
+          receiveData.isSelectedSafeInitialized ?
+            <Box mt={4}>
+              <ReceiveListOfWithdrawals/>
+            </Box>
             :
             ""
         }

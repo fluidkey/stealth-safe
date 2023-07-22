@@ -1,11 +1,10 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {SafeViewKey, useReceiveData, UserStealthAddress} from "@/context/ReceiveContext";
-import {generateKeys} from "@/components/umbra/generateSafeViewKeys";
 import {Signer} from "ethers";
 import {encryptPrivateViewKey} from "@/components/eth-crypto/encryptPrivateViewKey";
 import {useEthersSigner} from "@/components/utils/clientToSigner";
 import {useAccount, useContractRead} from "wagmi";
-import {ABI, VIEW_KEY_SAFE_REGISTRY_ADDRESS} from "@/components/Const";
+import {SAFE_VIEW_KEY_REGISTRY_ABI, SAFE_VIEW_KEY_REGISTRY_ADDRESS} from "@/components/Const";
 import {
   Alert,
   Box,
@@ -22,6 +21,7 @@ import {addSafe} from "@/components/safeKeyRegistry/addSafe";
 import {useRouter} from "next/router";
 import SuccessInitialized from "@/ui/organisms/Receive.RegisterSafe/SuccessInitialized";
 import {RefreshRounded} from "@mui/icons-material";
+import {generateKeys} from "@/components/umbra/umbraExtended";
 
 /**
  *
@@ -41,8 +41,8 @@ const ReceiveRegisterSafe: React.FC<IReceiveRegisterSafe> = (props) => {
   const [internalInitializationState, setInternalInitializationState] = useState<"none" | "sending" | "sent">("none");
 
   const readStealthSafeKeys = useContractRead({
-    address: VIEW_KEY_SAFE_REGISTRY_ADDRESS,
-    abi: ABI,
+    address: SAFE_VIEW_KEY_REGISTRY_ADDRESS,
+    abi: SAFE_VIEW_KEY_REGISTRY_ABI,
     functionName: 'stealthKeys',
     args: [receiveData.selectedSafe],
     watch: true

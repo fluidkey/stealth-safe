@@ -10,6 +10,7 @@ import {ThemeProvider} from "@mui/system";
 import {theme} from "@/GlobalStyles";
 import {Container, CssBaseline} from "@mui/material";
 import {ReceiveProvider} from "@/context/ReceiveContext";
+import {SendProvider} from "@/context/SendContext";
 
 const chains = [gnosis]
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_ID as string
@@ -31,7 +32,9 @@ export default function App({ Component, pageProps }: AppProps) {
           <CssBaseline />
           <Container maxWidth="lg">
             <ReceiveProvider>
-              <Component {...pageProps} />
+              <SendProvider>
+                <Component {...pageProps} />
+              </SendProvider>
             </ReceiveProvider>
           </Container>
         </ThemeProvider>
