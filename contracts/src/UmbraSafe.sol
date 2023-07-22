@@ -39,7 +39,7 @@ contract UmbraSafe {
         require(msg.value > 0, "msg.value cannot be 0");
         uint amount = msg.value;
         emit Announcement(_receiver, amount, ETH_TOKEN_PLACHOLDER, _pkx, _ciphertext);
-        _receiver.send(amount);
+        _receiver.call{value: amount}("");
     }
 
 }
