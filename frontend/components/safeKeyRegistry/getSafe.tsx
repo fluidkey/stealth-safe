@@ -17,7 +17,7 @@ export async function getSafe(safeAddress: string) {
    
     const contract = new ethers.Contract(contractAddress, abi, provider)
     const safeInfo = await contract.stealthKeys(safeAddress)
-
+    console.log(safeInfo)
     return safeInfo
 
 }

@@ -13,6 +13,7 @@ import { encryptPrivateViewKey } from '@/components/eth-crypto/encryptPrivateVie
 import { generateAddress } from '@/components/umbra/generateAddressFromKey'
 import { addSafe, executeTx } from '@/components/safeKeyRegistry/addSafe'
 import safeService from '@/components/safe/safeEthersAdapter'
+import { encryptDecrypt } from '@/components/eth-crypto/test'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -91,6 +92,19 @@ export default function Home() {
     console.log(execute)
   }
 
+  async function test() {
+    const keys = await generateKeys(signer as Signer)
+    for (let i = 0; i < stealthKeys.length; i++) {
+      if (stealthKeys[i].owner === address) {
+        console.log(stealthKeys)
+        const pubKeySliced = stealthKeys[i].viewingPublicKey.slice(2)
+        console.log(stealthKeys[i])
+        const testData = await encryptDecrypt(pubKeySliced as string, keys.viewingKeyPair.privateKeyHex as string, signer as Signer)
+        console.log(testData)
+      }
+    }
+  }
+
 
   return (
     <>
@@ -114,6 +128,7 @@ export default function Home() {
         <button onClick={submitKeys}>Submit Keys</button>
         <button onClick={getTransactions}>Get Transactions</button>
         {safeTransactions && <button onClick={executeTransaction}>Execute Transaction</button>}
+        <button onClick={test}>Test</button>
       </main>
     </>
   )

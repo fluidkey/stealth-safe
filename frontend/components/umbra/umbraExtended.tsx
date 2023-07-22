@@ -171,3 +171,10 @@ export async function sendPayment(stealthSafe: string, signer: Signer, pubKeyXCo
     const receipt = await call.wait() 
     return receipt
 }
+
+export async function getPrivateKeys(signer: Signer) {
+    const provider = signer.provider as ethers.providers.JsonRpcProvider;
+    const umbraSafe = new UmbraSafe(provider, 100);
+    const { spendingKeyPair, viewingKeyPair } = await umbraSafe.generateSafePrivateKeys(signer);
+    return { spendingKeyPair: spendingKeyPair, viewingKeyPair: viewingKeyPair};
+}
