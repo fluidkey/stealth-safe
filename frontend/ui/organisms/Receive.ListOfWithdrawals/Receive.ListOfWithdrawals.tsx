@@ -31,13 +31,17 @@ const ReceiveListOfWithdrawals: React.FC<IReceiveListOfWithdrawals> = (props) =>
     amount: 100,
     sender: "0xc08Fe093893db3A81766BCD1464a1a288C80F043",
     stealthSafeReceiver: "0x890E76Ef50B16Da99564Dce0ef7Ee554a35e5e55",
-    hasBeenWithdrawn: false
+    hasBeenWithdrawn: false,
+    hasBeenInitiated: false,
+    hasBeenExecuted: false,
   }, {
     date: 1690014900,
     amount: 80,
     sender: "0xc08Fe093893db3A81766BCD1464a1a288C80F043",
     stealthSafeReceiver: "0x890E76Ef50B16Da99564Dce0ef7Ee554a35e5e55",
-    hasBeenWithdrawn: true
+    hasBeenWithdrawn: true,
+    hasBeenInitiated: false,
+    hasBeenExecuted: false,
   }]
 
 
