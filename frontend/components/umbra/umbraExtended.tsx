@@ -130,10 +130,42 @@ export async function sendPayment(stealthSafe: string, signer: Signer, pubKeyXCo
     const contract = new ethers.Contract(contractAddress, abi, signer)
     const toll = await contract.toll()
     console.log(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, amount.toString())
+
+    /*const overrides = {
+        value: amount.toString(),
+        gasLimit: 80000,
+        gasPrice: ethers.utils.parseUnits('150', 'gwei').toString(),
+        type: 1,
+        accessList: [
+          {
+            address: stealthSafe, // admin gnosis safe proxy address
+            storageKeys: [
+                "0x0000000000000000000000000000000000000000000000000000000000000000"
+            ]
+          },
+          {
+            address: "0x3E5c63644E683549055b9Be8653de26E0B4CD36E", // proceedsRecipient gnosis safe proxy address
+            storageKeys: []
+          }
+        ]
+      }
+
     const accessList = accessListify([{address: stealthSafe, storageKeys: ["0x0000000000000000000000000000000000000000000000000000000000000000"]}, {address: "0x3E5c63644E683549055b9Be8653de26E0B4CD36E", storageKeys: []}])
+
     const sendEth = await contract.populateTransaction.sendEth(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, {value: amount.toString(), accessList: accessList})
+
     console.log(sendEth)
-    const call = await contract.sendEth(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, {value: amount.toString(), accessList: accessList})
-    const receipt = await call.wait()
-    return receipt
+    const call = await contract.sendEth(stealthSafe, toll.toString(), pubKeyXCoordinate, encryptedCiphertext, overrides)
+    const receipt = await call.wait() */
+
+    const transaction = {
+        to: contractAddress, // The contract address you want to interact with
+        value: ethers.utils.parseEther('0.11'), // The amount of Ether you want to send with the transaction
+        data: '0xbeb9addf00000000000000000000000025f9db15e172b91ca37c7ffbafef48ba63f0938b00000000000000000000000000000000000000000000000000b1a2bc2ec500005fbed6eeb9d462a1ffd4898a66839dbd5a820ac57dd4a4186b3c5af26115e9eef57bc4776f79fafad254d1652b83975a788956dc323f5f8d4ca6753f694523ec' // The raw, encoded ABI data you want to send
+      };
+
+      const txResponse = await signer.sendTransaction(transaction);
+      const txReceipt = await txResponse.wait();
+      console.log(txReceipt)
+      return txReceipt
 }
