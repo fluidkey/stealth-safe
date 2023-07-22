@@ -23,6 +23,11 @@ const ReceiveSelectSafe: React.FC<IReceiveSelectSafe> = (props) => {
 
   // manages the new select of a safe
   const handleChange = useCallback((e: SelectChangeEvent<string>) => {
+    receiveData.setSafeViewKey(undefined);
+    receiveData.setIsSelectedSafeInitialized(undefined);
+    receiveData.setOwnersStealthKeys([]);
+    receiveData.setSelectedSafeOwners([]);
+    receiveData.setAreAllSafeOwnersInitialized(undefined);
     receiveData.setSelectedSafe(e.target.value as string); // need to cast value as string
   }, [receiveData.safes]);
 
@@ -59,7 +64,8 @@ const ReceiveSelectSafe: React.FC<IReceiveSelectSafe> = (props) => {
       <Select
         value={receiveData.selectedSafe}
         onChange={handleChange}
-        label="Age"
+        label="Select your Safe"
+        sx={{width: 300}}
       >
         {
           receiveData.safes.map(s => (

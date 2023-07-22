@@ -7,6 +7,7 @@ import {useAccount} from "wagmi";
 import {ReceiveProvider, useReceiveData} from "@/context/ReceiveContext";
 import ReceiveSelectSafe from "@/ui/organisms/Receive.SelectSafe/Receive.SelectSafe";
 import Link from "next/link";
+import ReceiveRegisterSafe from "@/ui/organisms/Receive.RegisterSafe/Receive.RegisterSafe";
 
 /**
  *
@@ -102,17 +103,15 @@ const Receive: React.FC<IReceive> = (props) => {
             ""
         }
 
-
-
-        {/*<Box sx={{*/}
-        {/*  border: "1px #afafaf solid",*/}
-        {/*  backgroundColor: "#f9f9f9",*/}
-        {/*  p: 2,*/}
-        {/*  borderRadius: 4*/}
-        {/*}}>*/}
-        {/*  Ciao*/}
-        {/*</Box>*/}
-
+        {/* If all owners are initialized, proceed to check if the safe is registered, and later showing the possible withdrawals pending*/}
+        {
+          receiveData.areAllSafeOwnersInitialized ?
+            <>
+              <ReceiveRegisterSafe/>
+            </>
+            :
+            ""
+        }
 
       </Box>
     </>

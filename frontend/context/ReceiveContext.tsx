@@ -1,11 +1,19 @@
 // ReceiveContext.tsx
 import React, { createContext, useContext, useState } from 'react';
+import {KeyPair} from "umbra/umbra-js/src/";
 
 export interface UserStealthAddress {
   owner: string;
   address: string;
   spendingPublicKey: string;
   viewingPublicKey: string;
+  safeStealthViewPrivateEncKey?: string
+}
+
+export interface SafeViewKey {
+  viewingKeyPair: KeyPair,
+  prefix: number,
+  pubKeyXCoordinate: string
 }
 
 type ReceiveContextType = {
@@ -13,6 +21,7 @@ type ReceiveContextType = {
   selectedSafe: string;
   selectedSafeOwners: string[];
   ownersStealthKeys: UserStealthAddress[];
+  safeViewKey: SafeViewKey | undefined;
   areAllSafeOwnersInitialized: boolean | undefined;
   isSelectedSafeInitialized: boolean | undefined;
 
@@ -20,6 +29,7 @@ type ReceiveContextType = {
   setSelectedSafe: React.Dispatch<React.SetStateAction<string>>;
   setSelectedSafeOwners: React.Dispatch<React.SetStateAction<string[]>>;
   setOwnersStealthKeys: React.Dispatch<React.SetStateAction<UserStealthAddress[]>>;
+  setSafeViewKey: React.Dispatch<React.SetStateAction<SafeViewKey | undefined>>;
   setAreAllSafeOwnersInitialized: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setIsSelectedSafeInitialized: React.Dispatch<React.SetStateAction<boolean | undefined>>;
 };
@@ -30,12 +40,14 @@ const initialReceiveState: ReceiveContextType = {
   selectedSafe: '',
   selectedSafeOwners: [],
   ownersStealthKeys: [],
+  safeViewKey: undefined,
   areAllSafeOwnersInitialized: undefined,
   isSelectedSafeInitialized: undefined,
   setSafes: () => {},
   setSelectedSafe: () => {},
   setSelectedSafeOwners: () => {},
   setOwnersStealthKeys: () => {},
+  setSafeViewKey: () => {},
   setAreAllSafeOwnersInitialized: () => {},
   setIsSelectedSafeInitialized: () => {},
 };
@@ -54,6 +66,7 @@ export const ReceiveProvider: React.FC<React.PropsWithChildren<{}>> = ({ childre
   const [selectedSafe, setSelectedSafe] = useState<string>('');
   const [selectedSafeOwners, setSelectedSafeOwners] = useState<string[]>([]);
   const [ownersStealthKeys, setOwnersStealthKeys] = useState<UserStealthAddress[]>([]);
+  const [safeViewKey, setSafeViewKey] = useState<SafeViewKey | undefined>(undefined);
   const [areAllSafeOwnersInitialized, setAreAllSafeOwnersInitialized] = useState<boolean | undefined>(undefined);
   const [isSelectedSafeInitialized, setIsSelectedSafeInitialized] = useState<boolean | undefined>(undefined);
 
@@ -63,12 +76,14 @@ export const ReceiveProvider: React.FC<React.PropsWithChildren<{}>> = ({ childre
       selectedSafe,
       selectedSafeOwners,
       ownersStealthKeys,
+      safeViewKey,
       areAllSafeOwnersInitialized,
       isSelectedSafeInitialized,
       setSafes,
       setSelectedSafe,
       setSelectedSafeOwners,
       setOwnersStealthKeys,
+      setSafeViewKey,
       setAreAllSafeOwnersInitialized,
       setIsSelectedSafeInitialized
     }}>
