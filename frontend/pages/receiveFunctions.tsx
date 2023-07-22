@@ -4,7 +4,7 @@ import styles from '@/styles/Home.module.css'
 import { Web3Button } from '@web3modal/react'
 import { useAccount } from 'wagmi'
 import { useEthersSigner } from '@/components/utils/clientToSigner'
-import { getPrivateKeys } from '@/components/umbra/umbraExtended'
+import { genPersonalPrivateKeys } from '@/components/umbra/umbraExtended'
 import { Signer } from 'ethers'
 import { getSafe } from '@/components/safeKeyRegistry/getSafe'
 import { getSafesForOwner } from '@/components/safe/safeApiKit'
@@ -34,7 +34,7 @@ export default function sendFunctions() {
   }
   
   async function getPersonalPrivateKeys() {
-    const privateKeys = await getPrivateKeys(signer as Signer)
+    const privateKeys = await genPersonalPrivateKeys(signer as Signer)
     console.log(privateKeys)
     setPersonalPrivateViewKey(privateKeys)
   }

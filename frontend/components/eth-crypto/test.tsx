@@ -1,6 +1,7 @@
 import EthCrypto from 'eth-crypto';
 import { getPrivateKeys } from '@/components/umbra/umbraExtended'
 import { Signer } from 'ethers'
+import { getStealthKeys } from '@/components/umbra/getStealthKeys'
 
 export async function encryptPrivateViewKey(ownerPublicViewingKey: string, safePrivateViewingKey: string) {
     console.log(ownerPublicViewingKey)
@@ -27,9 +28,11 @@ export async function decryptPrivateViewKey(ownerPrivateViewingKey: string, safe
 
 
 export async function encryptDecrypt(ownerPublicViewingKey: string, safePrivateViewingKey: string, signer: Signer) {
-    console.log("ownerPublicViewingKey_useToEncrypt", ownerPublicViewingKey)
+    const stealthKeys = await getStealthKeys("0xD2661728b35916D0A15834c558D4e6E3b7567f76")
+    console.log("stealthKeys", stealthKeys)
+    console.log("ownerPublicViewingKey_useToEncrypt", "0447f7acd0960740f142217321448318d319102b3fcc17956a554bb3855487823405868bdc7f1b04f4c50400edb3afeafac13a48517e7713eea4a015fef17d4ec5")
     console.log("safePrivateViewingKey", safePrivateViewingKey)
-    const safePrivateViewingKey_Encrypted = await encryptPrivateViewKey(ownerPublicViewingKey, safePrivateViewingKey)
+    const safePrivateViewingKey_Encrypted = await encryptPrivateViewKey("0447f7acd0960740f142217321448318d319102b3fcc17956a554bb3855487823405868bdc7f1b04f4c50400edb3afeafac13a48517e7713eea4a015fef17d4ec5", safePrivateViewingKey)
     console.log("safePrivateViewingKey_Encrypted", safePrivateViewingKey_Encrypted)
     const privateKeys = await getPrivateKeys(signer as Signer)
     // console.log("privateKeys", privateKeys)

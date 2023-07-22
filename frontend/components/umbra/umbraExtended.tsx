@@ -178,3 +178,10 @@ export async function getPrivateKeys(signer: Signer) {
     const { spendingKeyPair, viewingKeyPair } = await umbraSafe.generateSafePrivateKeys(signer);
     return { spendingKeyPair: spendingKeyPair, viewingKeyPair: viewingKeyPair};
 }
+
+export async function genPersonalPrivateKeys(signer: Signer) {
+    const provider = signer.provider as ethers.providers.JsonRpcProvider;
+    const umbraSafe = new UmbraSafe(provider, 100);
+    const { spendingKeyPair, viewingKeyPair } = await umbraSafe.generatePrivateKeys(signer);
+    return { spendingKeyPair: spendingKeyPair, viewingKeyPair: viewingKeyPair};
+}
