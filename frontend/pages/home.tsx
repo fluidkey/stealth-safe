@@ -1,5 +1,8 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Box, Button, Typography} from "@mui/material";
+import {Web3Button} from "@web3modal/react";
+import {useAccount} from "wagmi";
+import {useRouter} from "next/router";
 
 /**
  *
@@ -8,6 +11,18 @@ import {Box, Button, Typography} from "@mui/material";
  * @constructor
  */
 const Home: React.FC<IHome> = (props) => {
+
+  const account = useAccount();
+  const router = useRouter();
+
+  const [isAccountConnected, setIsAccountConnected] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (account.isConnected)
+      setIsAccountConnected(true);
+  }, [account])
+
+
   return (
     <Box display={"flex"}
          alignItems={"center"}
@@ -33,9 +48,15 @@ const Home: React.FC<IHome> = (props) => {
           Receive and send, blending Safe advantages and stealth privacy
         </Typography>
       </Box>
-      <Button variant={"contained"}>
-        Connect Wallet To Start
-      </Button>
+
+      {
+        isAccountConnected ?
+          <Button variant={"contained"} onClick={() => router.push("/receive") }>
+            Enter dApp
+          </Button>
+          :
+          <Web3Button />
+      }
 
     </Box>
   );
