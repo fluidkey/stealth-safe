@@ -85,6 +85,7 @@ export async function generateKeys(signer: Signer) {
     const provider = signer.provider as ethers.providers.JsonRpcProvider;
     const umbraSafe = new UmbraSafe(provider, 100);
     const { viewingKeyPair } = await umbraSafe.generateSafePrivateKeys(signer);
+    console.log("generateKeys_viewingKeyPair", viewingKeyPair);
     const { prefix: viewingPrefix, pubKeyXCoordinate: viewingPubKeyX } = KeyPair.compressPublicKey(viewingKeyPair.publicKeyHex)
     return { viewingKeyPair: viewingKeyPair, prefix: viewingPrefix, pubKeyXCoordinate: viewingPubKeyX };
 }
@@ -168,7 +169,7 @@ export async function sendPayment(stealthSafe: string, signer: Signer, pubKeyXCo
     const contractAddress = "0x95361e14DF30064FF39aE7b19E7aA938D2b1a5d0"
     const contract = new ethers.Contract(contractAddress, abi, signer)
     const call = await contract.sendEth(stealthSafe, "0", pubKeyXCoordinate, encryptedCiphertext, {value: amount.toString()})
-    const receipt = await call.wait() 
+    const receipt = await call.wait()
     return receipt
 }
 
