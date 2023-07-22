@@ -57,10 +57,6 @@ const Receive: React.FC<IReceive> = (props) => {
            alignItems="center"
            flexDirection="column"
       >
-        {/* Connected wallet row */}
-        <Box width={"100%"} mt={2} display={"flex"} justifyContent={"center"}>
-          <Web3Button />
-        </Box>
 
         {/* Into of the page */}
         <Typography variant="h2"
