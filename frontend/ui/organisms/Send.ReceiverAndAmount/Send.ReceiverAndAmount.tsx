@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Box, TextField} from "@mui/material";
+import {Box, InputAdornment, TextField, Typography} from "@mui/material";
 import {useSendData} from "@/context/SendContext";
 
 /**
@@ -40,8 +40,17 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
     if (sendData.sendTo == "") setError("");
   }
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const amount = Number(value);
+    if (!isNaN(amount) && amount >= 0.01) {
+      sendData.setSendAmount(amount);
+    } else sendData.setSendAmount(0)
+  }
+
   return (
-    <Box>
+    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mt: 3 }}>
+
       <TextField label="Enter recipient address"
                  variant="standard"
                  value={sendData.sendTo}
@@ -52,6 +61,29 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
                  sx={{
                    mt: 3,
                    width: 300
+                 }}
+      />
+
+      <TextField variant="standard"
+                 value={sendData.sendAmount}
+                 onChange={handleAmountChange}
+                 type="number"
+                 InputProps={{
+                   endAdornment: <InputAdornment position="end">xDAI</InputAdornment>,
+                 }}
+                 inputProps={{ min: "0.01", step: "0.01" }}
+                 sx={{
+                   width: 90,
+                   '& input::-webkit-inner-spin-button': {
+                     '-webkit-appearance': 'none',
+                   },
+                   '& input::-webkit-outer-spin-button': {
+                     '-webkit-appearance': 'none',
+                   },
+                   '& input': {
+                     '-moz-appearance': 'textfield',
+                     'text-align': 'right'
+                   },
                  }}
       />
     </Box>
