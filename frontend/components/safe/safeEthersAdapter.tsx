@@ -6,7 +6,7 @@ import SafeApiKit from '@safe-global/api-kit'
 const provider = new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm")
 const safeOwner = provider.getSigner(0)
 
-export const ethAdapter = new EthersAdapter({
+const ethAdapter = new EthersAdapter({
   ethers,
   signerOrProvider: safeOwner
 }) as unknown as EthAdapter
