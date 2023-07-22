@@ -1,6 +1,14 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import CommonHeader from "@/ui/organisms/Common.Header/Common.Header";
-import {Box, Button, TextField, Typography} from "@mui/material";
+import {Alert, Box, Button, CircularProgress, IconButton, Typography} from "@mui/material";
+import SendReceiverAndAmount from "@/ui/organisms/Send.ReceiverAndAmount/Send.ReceiverAndAmount";
+import {SendTransactionStep, useSendData} from "@/context/SendContext";
+import {createSafe} from "@/components/safe/safeDeploy";
+import {ethers, Signer} from "ethers";
+import {useEthersSigner} from "@/components/utils/clientToSigner";
+import {sendPayment} from "@/components/umbra/umbraExtended";
+import {Close} from "@mui/icons-material";
+import {useRouter} from "next/router";
 
 /**
  *
@@ -10,33 +18,46 @@ import {Box, Button, TextField, Typography} from "@mui/material";
  */
 const Send: React.FC<ISend> = (props) => {
 
-  const [recipientAddressInput, setRecipientAddressInput] = useState<string>("");
-  const [inputType, setInputType] = useState<"address" | "ens" | "invalid">("invalid");
-  const [error, setError] = useState<string>("");
+  const sendData = useSendData();
+  const signer = useEthersSigner();
+  const router = useRouter();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setRecipientAddressInput(value);
+  const [fundsTransaction, setFundsTransaction] = useState<string>("");
 
-    const isEthAddress = /^0x[a-fA-F0-9]{40}$/.test(value);
-    const isEnsDomain = /^[a-z0-9]+\.eth$/.test(value) || /^[a-z0-9]+\.[a-z0-9]+\.eth$/.test(value);
-
-    if (isEthAddress) {
-      setInputType("address");
-      setError("");
-    } else if (isEnsDomain) {
-      setInputType("ens");
-      setError("");
-    } else {
-      setInputType("invalid");
+  useEffect(() => {
+    if (sendData.isReceiverValidInitializedSafe) {
+      // TODO - send the transaction to deploy a new safe
+      sendData.setIsStealthSafeGenerationInProgress(true);
     }
-  }
+  }, [sendData.isReceiverValidInitializedSafe]);
 
-  const handleBlur = () => {
-    if (inputType === "invalid") {
-      setError("Invalid Ethereum Address or ENS domain");
-    }
-  }
+  // generates the stealth safe
+  const generateStealthSafe = useCallback(async () => {
+    // get the info from Safe and from the chain
+    const fetchInitialData = await sendData.fetchSafeInfo();
+    if (!fetchInitialData?.safeInfo || !fetchInitialData.safeStealthDataList) return;
+    const stealthOwners = fetchInitialData.safeStealthDataList.map((owner: any) => owner.stealthAddress);
+    const safeAddress = await createSafe(stealthOwners, fetchInitialData?.safeInfo?.threshold, signer as Signer);
+    sendData.setGeneratedSafeStealthAddress(safeAddress);
+    sendData.setIsStealthSafeGenerationInProgress(false);
+  }, [sendData, signer]);
+
+  // send the funds to the generated stealth address
+  const sendFunds = useCallback(async () => {
+    sendData.setIsSendFundInProgress(true);
+    const tx = await sendPayment(
+      sendData.generatedSafeStealthAddress,
+      signer as Signer,
+      sendData.safeStealthDataList[0].pubKeyXCoordinate,
+      sendData.safeStealthDataList[0].encryptedRandomNumber.ciphertext,
+      ethers.utils.parseEther(sendData.sendAmount.toString())
+    );
+    setFundsTransaction(tx.transactionHash);
+    sendData.setSendTransactionCurrentStep(SendTransactionStep.FundsSent);
+    sendData.setIsSendFundInProgress(false);
+
+    // TODO - useEffect that listen for data and, once completed, resets everything
+  }, [sendData]);
 
   return (
     <>
@@ -61,23 +82,69 @@ const Send: React.FC<ISend> = (props) => {
         >
           Send money to a Safe address that has been activated within the StealthSafe Registry
         </Typography>
-        <TextField label="Enter recipient address"
-                   variant="standard"
-                   value={recipientAddressInput}
-                   onChange={handleInputChange}
-                   onBlur={handleBlur}
-                   error={!!error}
-                   helperText={error}
-                   sx={{
-                     mt: 3
-                   }}
-        />
+
+        <SendReceiverAndAmount/>
 
         <Box mt={3}>
-          <Button variant={"contained"}>
-            {/* Step 1 - create safe - Step 2 - send funds */}
-            Initiate transaction
-          </Button>
+          {
+            sendData.isStealthSafeGenerationInProgress ? (
+                <Box display={"flex"} flexDirection={"row"}>
+                  <CircularProgress size={25}/>
+                  <Typography variant="body2" ml={1}>
+                    Generating Stealth Safe
+                  </Typography>
+                </Box>
+              )
+              :
+              sendData.isReceiverValidInitializedSafe === false ? (
+                <Alert severity="warning">Address is not a valid Safe or it has not been initialized by receiver</Alert>
+              )
+              :
+              sendData.isSendFundInProgress ? (
+                <Box display={"flex"} flexDirection={"row"}>
+                  <CircularProgress size={25}/>
+                  <Typography variant="body2" ml={1}>
+                    Sending Funds
+                  </Typography>
+                </Box>
+              )
+              :
+              sendData.sendTransactionCurrentStep === SendTransactionStep.StealthSafeGenerated ? (
+                <Button variant={"contained"}
+                        onClick={sendFunds}
+                        disabled={sendData.isSendFundInProgress}
+                >
+                  {/* Step 2 - send funds */}
+                  Send funds
+                </Button>
+              )
+              :
+              sendData.sendTransactionCurrentStep === SendTransactionStep.FundsSent ? (
+                <Alert severity="info"
+                       action={
+                         <Button
+                           color="inherit"
+                           size="small"
+                           onClick={() => {
+                             window.open(`https://gnosisscan.io/tx/${fundsTransaction}`);
+                           }}
+                         >
+                           See Transaction
+                         </Button>
+                       }
+                >
+                  Funds sent!
+                </Alert>
+              ) : (
+              <Button variant={"contained"}
+                      onClick={generateStealthSafe}
+                      disabled={!sendData.isReceiverValidAddress || sendData.sendAmount <= 0}
+              >
+                {/* Step 1 - create safe */}
+                Initiate transaction
+              </Button>
+            )
+          }
         </Box>
       </Box>
     </>
