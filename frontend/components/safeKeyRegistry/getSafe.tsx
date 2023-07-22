@@ -1,7 +1,4 @@
-import { ethers, Signer } from "ethers";
-import safeService from "../safe/safeEthersAdapter";
-import Safe from "@safe-global/protocol-kit";
-import { ProposeTransactionProps } from "@safe-global/api-kit"
+import { ethers } from "ethers";
 import { EthersAdapter } from '@safe-global/protocol-kit'
 import { EthAdapter } from '@safe-global/safe-core-sdk-types'
 

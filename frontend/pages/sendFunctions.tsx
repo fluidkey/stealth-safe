@@ -6,8 +6,11 @@ import { useAccount } from 'wagmi'
 import { useEthersSigner } from '@/components/utils/clientToSigner'
 import { getSafeInfo } from '@/components/safe/safeApiKit'
 import { useState } from 'react'
-import { getSafe } from '@/components/safeKeyRegistry/getSafe'
 import { prepareSendToSafe } from '@/components/umbra/umbraExtended'
+import { createSafe } from '@/components/safe/safeDeploy'
+import { Signer } from 'ethers'
+import { getSafe } from '@/components/safeKeyRegistry/getSafe'
+import { sendPayment } from '@/components/umbra/umbraExtended'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,20 +21,34 @@ export default function sendFunctions() {
   const [selectedSafe, setSelectedSafe] = useState("")
   const [safeInfo, setSafeInfo] = useState<any>()
   const [stealthData, setStealthData] = useState<any>()
+  const [sharedSafeViewKey, setSharedSafeViewKey] = useState({})
 
   async function fetchSafeInfo () {
     const safeInfo = await getSafeInfo(selectedSafe)
     setSafeInfo(safeInfo)
-    const getStealthData = await prepareSendToSafe(safeInfo.owners)
+    const { viewingPubKey, viewingPubKeyPrefix} = await getSafe(selectedSafe)
+    const getStealthData = await prepareSendToSafe(safeInfo.owners, viewingPubKey, viewingPubKeyPrefix)
     setStealthData(getStealthData)
-  }
+    console.log(getStealthData)
+    }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedSafe(e.target.value)
     }
 
-async function createStealthSafe () {
-    
+    async function createStealthSafe () {
+        const stealthOwners = stealthData.map((owner: any) => owner.stealthAddress)
+        console.log(stealthOwners)
+        const safeAddress = await createSafe(stealthOwners, safeInfo.threshold, signer as Signer)
+        console.log(safeAddress)
+        //const sendToStealth = await send(safeAddress)
+    }
+
+    async function send(stealthSafe: string) {
+        const tx = await sendPayment(stealthSafe, signer as Signer, stealthData[0].pubKeyXCoordinate, stealthData[0].encryptedRandomNumber.ciphertext, 0.000001)
+        console.log(tx)
+    }
+
 
   return (
     <>
@@ -44,6 +61,7 @@ async function createStealthSafe () {
         <Web3Button />
         <input type="text" placeholder="Enter Safe Address" onChange={handleInputChange}/>
         <button onClick={fetchSafeInfo}>Submit</button>
+        <button onClick={createStealthSafe}>Create Stealth Safe</button>
       </main>
     </>
   )

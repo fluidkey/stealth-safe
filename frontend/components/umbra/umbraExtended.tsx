@@ -1,6 +1,6 @@
 import { Umbra, KeyPair, RandomNumber } from 'umbra/umbra-js/src/';
 import { lookupRecipient } from 'umbra/umbra-js/src/utils/utils';
-import { Signer, ethers } from "ethers"
+import { BigNumberish, Signer, ethers, ContractTransaction } from "ethers"
 import { hexlify, toUtf8Bytes, isHexString, sha256 } from 'ethers/lib/utils';
 
 class UmbraSafe extends Umbra {
@@ -49,25 +49,27 @@ class UmbraSafe extends Umbra {
             return { spendingKeyPair, viewingKeyPair };
     }
 
-    async prepareSendSafe(recipientIds: string[], lookupOverrides: any) {
+    async prepareSendSafe(recipientIds: string[], viewingPubKey: string, viewingPubKeyPrefix: string, lookupOverrides: any) {
         console.log(recipientIds)
         let recipients: {recipientId: string, stealthKeyPair: any, pubKeyXCoordinate: any, encryptedRandomNumber: any, stealthAddress: string}[] = []
+        const viewingPubKeyUncompressed = KeyPair.getUncompressedFromX(viewingPubKey, Number(viewingPubKeyPrefix))
 
         const randomNumber = new RandomNumber();
+
+        const viewingKeyPair = new KeyPair(viewingPubKeyUncompressed);
+
+        const encrypted = viewingKeyPair.encrypt(randomNumber);
+
+        const { pubKeyXCoordinate } = KeyPair.compressPublicKey(encrypted.ephemeralPublicKey);
 
         // Lookup recipient's public key
         for (let i = 0; i < recipientIds.length; i++) {
             console.log(recipientIds[i])
-            const { spendingPublicKey, viewingPublicKey } = await lookupRecipient(recipientIds[i], this.provider, lookupOverrides);
-            if (!spendingPublicKey || !viewingPublicKey) {
+            const { spendingPublicKey } = await lookupRecipient(recipientIds[i], this.provider, lookupOverrides);
+            if (!spendingPublicKey) {
             throw new Error(`Could not retrieve public keys for recipient ID ${recipientIds[i]}`);
             }
             const spendingKeyPair = new KeyPair(spendingPublicKey);
-            const viewingKeyPair = new KeyPair(viewingPublicKey);
-
-            const encrypted = viewingKeyPair.encrypt(randomNumber);
-
-            const { pubKeyXCoordinate } = KeyPair.compressPublicKey(encrypted.ephemeralPublicKey);
 
             const stealthKeyPair = spendingKeyPair.mulPublicKey(randomNumber);
 
@@ -75,9 +77,26 @@ class UmbraSafe extends Umbra {
 
             recipients.push({recipientId: recipientIds[i], stealthKeyPair, pubKeyXCoordinate, encryptedRandomNumber: encrypted, stealthAddress})
         }
+        console.log(recipients)
         return recipients
       }
 
+      async sendEth(stealthSafe: string, signer: Signer, pubKeyXCoordinate: string, encryptedCiphertext: string, amount: BigNumberish) {
+
+            // Get toll amount from contract.
+            const toll = await this.umbraContract.toll();
+
+            // Send transaction.
+            const txSigner = this.getConnectedSigner(signer as any); // signer input validated
+            let tx: ContractTransaction;
+            const txOverrides = { value: toll.add(amount) };
+            tx = await this.umbraContract
+                .connect(txSigner)
+                .sendEth(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, txOverrides);
+
+            // We do not wait for the transaction to be mined before returning it
+            return tx;
+      }
 }
 
 export async function generateKeys(signer: Signer) {
@@ -88,9 +107,15 @@ export async function generateKeys(signer: Signer) {
     return { viewingKeyPair: viewingKeyPair, prefix: viewingPrefix, pubKeyXCoordinate: viewingPubKeyX };
 }
 
-export async function prepareSendToSafe(recipientIds: string[]) {
+export async function prepareSendToSafe(recipientIds: string[], viewingPubKey: string, viewingPubKeyPrefix: string) {
     const provider = new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm")
     const umbraSafe = new UmbraSafe(provider, 100)
-    const response = await umbraSafe.prepareSendSafe(recipientIds, {})
+    const response = await umbraSafe.prepareSendSafe(recipientIds, viewingPubKey, viewingPubKeyPrefix, {})
     return response
+}
+
+export async function sendPayment(stealthSafe: string, signer: Signer, pubKeyXCoordinate: string, encryptedCiphertext: string, amount: number) {
+    const provider = signer.provider as ethers.providers.JsonRpcProvider;
+    const umbraSafe = new UmbraSafe(provider, 100);
+    const tx = await umbraSafe.sendEth(stealthSafe, signer, pubKeyXCoordinate, encryptedCiphertext, amount)
 }
