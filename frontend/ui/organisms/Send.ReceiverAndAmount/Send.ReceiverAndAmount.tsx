@@ -16,7 +16,7 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
   const [inputType, setInputType] = useState<"address" | "ens" | "invalid">("invalid");
   const [error, setError] = useState<string>("");
 
-  const { data, isError, isLoading } = useBalance({
+  const { data, isError, isLoading, isSuccess } = useBalance({
     address: account.address
   })
 
@@ -97,14 +97,14 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
         />
       </Box>
       {
-        data?.formatted ?
+        !!data?.formatted ?
           <Box width={"100%"} textAlign={"right"} mt={0.5}>
             <Typography fontSize={13}>
               <strong>Balance:</strong>&nbsp;{parseFloat(data?.formatted).toFixed(2)} xDAI
             </Typography>
           </Box>
           :
-          ""
+          <Box/>
       }
     </Box>
   );
