@@ -109,6 +109,15 @@ const Receive: React.FC<IReceive> = (props) => {
             ""
         }
 
+        {
+          receiveData.isSelectedSafeInitialized ?
+            <Box mt={4}>
+              Show table with withdrawals
+            </Box>
+            :
+            ""
+        }
+
       </Box>
     </>
   );
