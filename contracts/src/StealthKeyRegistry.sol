@@ -89,6 +89,9 @@ contract StealthKeyRegistry {
 
         // Store viewPubKey
 
+        // Delete any existing values from safePrivateKeys[_registrant]
+        delete safePrivateKeys[_registrant];
+
         // Ensure the opposite prefix indices are empty
         delete keys[_registrant][5 - _viewingPubKeyPrefix];
 
