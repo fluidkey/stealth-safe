@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import CommonHeader from "@/ui/organisms/Common.Header/Common.Header";
-import {Box, Button, TextField, Typography} from "@mui/material";
+import {Box, Button, CircularProgress, TextField, Typography} from "@mui/material";
 import SendReceiverAndAmount from "@/ui/organisms/Send.ReceiverAndAmount/Send.ReceiverAndAmount";
+import {useSendData} from "@/context/SendContext";
 
 /**
  *
@@ -10,6 +11,19 @@ import SendReceiverAndAmount from "@/ui/organisms/Send.ReceiverAndAmount/Send.Re
  * @constructor
  */
 const Send: React.FC<ISend> = (props) => {
+
+  const sendData = useSendData();
+
+  useEffect(() => {
+    if (sendData.isReceiverValidInitializedSafe) {
+      // TODO - send the transaction to deploy a new safe
+      sendData.setIsStealthSafeGenerationInProgress(true);
+    }
+  }, [sendData.isReceiverValidInitializedSafe]);
+
+  const initiateTransaction = useCallback(() => {
+    // check receipent is registered and valid
+  }, []);
 
   return (
     <>
@@ -38,10 +52,20 @@ const Send: React.FC<ISend> = (props) => {
         <SendReceiverAndAmount/>
 
         <Box mt={3}>
-          <Button variant={"contained"}>
-            {/* Step 1 - create safe - Step 2 - send funds */}
-            Initiate transaction
-          </Button>
+          {
+            sendData.isStealthSafeGenerationInProgress ?
+              <Box display={"flex"} flexDirection={"row"}>
+                <CircularProgress size={25}/>
+                <Typography variant="body2" ml={1}>
+                  Generating Stealth Safe
+                </Typography>
+              </Box>
+              :
+              <Button variant={"contained"} onClick={initiateTransaction} disabled={!sendData.isReceiverValidAddress}>
+                {/* Step 1 - create safe - Step 2 - send funds */}
+                Initiate transaction
+              </Button>
+          }
         </Box>
       </Box>
     </>

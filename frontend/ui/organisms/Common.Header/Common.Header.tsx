@@ -65,7 +65,8 @@ const CommonHeader: React.FC<ICommonHeader> = (props) => {
           onClick={() => router.push("/send")}
           sx={{
             cursor: "pointer",
-            textDecoration: router.pathname === '/send' ? 'underline' : 'none'
+            textDecoration: router.pathname === '/send' ? 'underline' : 'none',
+            fontWeight: router.pathname === '/send' ? 500 : undefined,
           }}>
           Send
         </Typography>
@@ -75,7 +76,8 @@ const CommonHeader: React.FC<ICommonHeader> = (props) => {
           onClick={() => router.push("/receive")}
           sx={{
             cursor: "pointer",
-            textDecoration: router.pathname === '/receive' ? 'underline' : 'none'
+            textDecoration: router.pathname === '/receive' ? 'underline' : 'none',
+            fontWeight: router.pathname === '/receive' ? 500 : undefined,
           }}>
           Receive
         </Typography>
