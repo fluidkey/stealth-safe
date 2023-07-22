@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Box, InputAdornment, TextField, Typography} from "@mui/material";
 import {useSendData} from "@/context/SendContext";
 import {useAccount, useBalance} from "wagmi";
@@ -13,16 +13,32 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
   const sendData = useSendData();
   const account = useAccount();
 
+  const inputxDaiRef = useRef<HTMLInputElement>(null);
+
   const [inputType, setInputType] = useState<"address" | "ens" | "invalid">("invalid");
   const [error, setError] = useState<string>("");
+  const [balanceData, setBalanceData] = useState<undefined | string>(undefined);
 
   const { data, isError, isLoading, isSuccess } = useBalance({
     address: account.address
   })
 
-  console.log(data);
+  // set the balance once loaded
+  useEffect(() => {
+    if (!!data?.formatted) {
+      setBalanceData(parseFloat(data?.formatted).toFixed(2));
+    }
+  }, [data?.formatted]);
+
+  // the function to handle focus event
+  const handleInputxDaiFocus = () => {
+    if (inputxDaiRef.current && sendData.sendAmount === 0) {
+      inputxDaiRef.current.select();
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    sendData.setIsReceiverValidInitializedSafe(undefined);
     const value = e.target.value;
     sendData.setSendTo(value);
 
@@ -30,6 +46,8 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
     const isEnsDomain = /^[a-z0-9]+\.eth$/.test(value) || /^[a-z0-9]+\.[a-z0-9]+\.eth$/.test(value);
 
     // TODO allow to add an ENS domain
+
+    // TODO when the tx starts, place a button to cancel the freeze (at the moment user has to refresh the page, or complete the flow)
 
     if (isEthAddress) {
       setInputType("address");
@@ -67,6 +85,7 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
                    onBlur={handleBlur}
                    error={!!error}
                    helperText={error}
+                   disabled={sendData.isStealthSafeGenerationInProgress || sendData.generatedSafeStealthAddress !== ""}
                    sx={{
                      mt: 3,
                      width: 300
@@ -80,7 +99,9 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
                    InputProps={{
                      endAdornment: <InputAdornment position="end">xDAI</InputAdornment>,
                    }}
-                   inputProps={{ min: "0.01", step: "0.01" }}
+                   disabled={sendData.isStealthSafeGenerationInProgress || sendData.generatedSafeStealthAddress !== ""}
+                   inputProps={{ min: "0.01", step: "0.01", ref: inputxDaiRef }}
+                   onFocus={handleInputxDaiFocus}  // Add this line
                    sx={{
                      width: 90,
                      '& input::-webkit-inner-spin-button': {
@@ -95,16 +116,17 @@ const SendReceiverAndAmount: React.FC<ISendReceiverAndAmount> = (props) => {
                      },
                    }}
         />
+
       </Box>
       {
-        !!data?.formatted ?
+        balanceData !== null ?
           <Box width={"100%"} textAlign={"right"} mt={0.5}>
             <Typography fontSize={13}>
-              <strong>Balance:</strong>&nbsp;{parseFloat(data?.formatted).toFixed(2)} xDAI
+              <strong>Balance:</strong>&nbsp;{balanceData} xDAI
             </Typography>
           </Box>
           :
-          <Box/>
+          ""
       }
     </Box>
   );
