@@ -131,8 +131,9 @@ export async function sendPayment(stealthSafe: string, signer: Signer, pubKeyXCo
     const toll = await contract.toll()
     console.log(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, amount.toString())
     const accessList = accessListify([{address: stealthSafe, storageKeys: ["0x0000000000000000000000000000000000000000000000000000000000000000"]}, {address: "0x3E5c63644E683549055b9Be8653de26E0B4CD36E", storageKeys: []}])
-    const sendEth = await contract.sendEth(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, {value: amount.toString(), accessList: accessList})
+    const sendEth = await contract.populateTransaction.sendEth(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, {value: amount.toString(), accessList: accessList})
     console.log(sendEth)
-    const receipt = await sendEth.wait()
+    const call = await contract.sendEth(stealthSafe, toll, pubKeyXCoordinate, encryptedCiphertext, {value: amount.toString(), accessList: accessList})
+    const receipt = await call.wait()
     return receipt
 }

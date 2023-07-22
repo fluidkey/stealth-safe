@@ -46,7 +46,7 @@ export default function sendFunctions() {
 //0x25F9db15e172B91cA37C7ffbAFEF48Ba63f0938B
     async function send(stealthSafe: string) {
         console.log(stealthSafe, signer, stealthData[0].pubKeyXCoordinate, stealthData[0].encryptedRandomNumber.ciphertext)
-        const tx = await sendPayment(stealthSafe, signer as Signer, stealthData[0].pubKeyXCoordinate, stealthData[0].encryptedRandomNumber.ciphertext, 500000000000000000)
+        const tx = await sendPayment(stealthSafe, signer as Signer, stealthData[0].pubKeyXCoordinate, stealthData[0].encryptedRandomNumber.ciphertext, 110000000000000000)
         console.log(tx)
     }
 
