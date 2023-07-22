@@ -9,6 +9,7 @@ import React from "react";
 import {ThemeProvider} from "@mui/system";
 import {theme} from "@/GlobalStyles";
 import {Container, CssBaseline} from "@mui/material";
+import {ReceiveProvider} from "@/context/ReceiveContext";
 
 const chains = [gnosis]
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_ID as string
@@ -29,7 +30,9 @@ export default function App({ Component, pageProps }: AppProps) {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Container maxWidth="lg">
-            <Component {...pageProps} />
+            <ReceiveProvider>
+              <Component {...pageProps} />
+            </ReceiveProvider>
           </Container>
         </ThemeProvider>
       </WagmiConfig>
