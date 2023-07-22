@@ -62,6 +62,11 @@ export const theme = createTheme({
       main: '#447B3B',
       light: "#4CAF50",
       dark: "#1B5E20"
+    },
+    text: {
+      primary: "#151515",
+      secondary: "#565656",
+      disabled: "#777777"
     }
   },
   components: {
