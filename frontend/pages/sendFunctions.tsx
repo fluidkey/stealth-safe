@@ -7,7 +7,7 @@ import { useEthersSigner } from '@/components/utils/clientToSigner'
 import { getSafeInfo } from '@/components/safe/safeApiKit'
 import { useState } from 'react'
 import { getSafe } from '@/components/safeKeyRegistry/getSafe'
-
+import { prepareSendToSafe } from '@/components/umbra/umbraExtended'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,18 +17,21 @@ export default function sendFunctions() {
   const signer = useEthersSigner()
   const [selectedSafe, setSelectedSafe] = useState("")
   const [safeInfo, setSafeInfo] = useState<any>()
-  const [stealthData, setStealthData] = useState()
+  const [stealthData, setStealthData] = useState<any>()
 
   async function fetchSafeInfo () {
     const safeInfo = await getSafeInfo(selectedSafe)
     setSafeInfo(safeInfo)
-    const stealthData = await getSafe(selectedSafe)
-    setStealthData(stealthData)
+    const getStealthData = await prepareSendToSafe(safeInfo.owners)
+    setStealthData(getStealthData)
   }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedSafe(e.target.value)
     }
+
+async function createStealthSafe () {
+    
 
   return (
     <>

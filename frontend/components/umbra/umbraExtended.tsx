@@ -1,4 +1,5 @@
-import { Umbra, KeyPair } from 'umbra/umbra-js/src/';
+import { Umbra, KeyPair, RandomNumber } from 'umbra/umbra-js/src/';
+import { lookupRecipient } from 'umbra/umbra-js/src/utils/utils';
 import { Signer, ethers } from "ethers"
 import { hexlify, toUtf8Bytes, isHexString, sha256 } from 'ethers/lib/utils';
 
@@ -47,6 +48,36 @@ class UmbraSafe extends Umbra {
             const viewingKeyPair = new KeyPair(viewingPrivateKey);
             return { spendingKeyPair, viewingKeyPair };
     }
+
+    async prepareSendSafe(recipientIds: string[], lookupOverrides: any) {
+        console.log(recipientIds)
+        let recipients: {recipientId: string, stealthKeyPair: any, pubKeyXCoordinate: any, encryptedRandomNumber: any, stealthAddress: string}[] = []
+
+        const randomNumber = new RandomNumber();
+
+        // Lookup recipient's public key
+        for (let i = 0; i < recipientIds.length; i++) {
+            console.log(recipientIds[i])
+            const { spendingPublicKey, viewingPublicKey } = await lookupRecipient(recipientIds[i], this.provider, lookupOverrides);
+            if (!spendingPublicKey || !viewingPublicKey) {
+            throw new Error(`Could not retrieve public keys for recipient ID ${recipientIds[i]}`);
+            }
+            const spendingKeyPair = new KeyPair(spendingPublicKey);
+            const viewingKeyPair = new KeyPair(viewingPublicKey);
+
+            const encrypted = viewingKeyPair.encrypt(randomNumber);
+
+            const { pubKeyXCoordinate } = KeyPair.compressPublicKey(encrypted.ephemeralPublicKey);
+
+            const stealthKeyPair = spendingKeyPair.mulPublicKey(randomNumber);
+
+            const stealthAddress = stealthKeyPair.address;
+
+            recipients.push({recipientId: recipientIds[i], stealthKeyPair, pubKeyXCoordinate, encryptedRandomNumber: encrypted, stealthAddress})
+        }
+        return recipients
+      }
+
 }
 
 export async function generateKeys(signer: Signer) {
@@ -55,4 +86,11 @@ export async function generateKeys(signer: Signer) {
     const { viewingKeyPair } = await umbraSafe.generateSafePrivateKeys(signer);
     const { prefix: viewingPrefix, pubKeyXCoordinate: viewingPubKeyX } = KeyPair.compressPublicKey(viewingKeyPair.publicKeyHex)
     return { viewingKeyPair: viewingKeyPair, prefix: viewingPrefix, pubKeyXCoordinate: viewingPubKeyX };
+}
+
+export async function prepareSendToSafe(recipientIds: string[]) {
+    const provider = new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm")
+    const umbraSafe = new UmbraSafe(provider, 100)
+    const response = await umbraSafe.prepareSendSafe(recipientIds, {})
+    return response
 }
