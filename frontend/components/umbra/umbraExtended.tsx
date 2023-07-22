@@ -3,6 +3,9 @@ import { lookupRecipient } from 'umbra/umbra-js/src/utils/utils';
 import {BigNumberish, Signer, ethers, ContractTransaction, BigNumber} from "ethers"
 import { hexlify, toUtf8Bytes, isHexString, sha256, accessListify } from 'ethers/lib/utils';
 import {UMBRA_SAFE_ABI, UMBRA_SAFE_ADDRESS} from "@/components/Const";
+import { getSafeInfo } from '../safe/safeApiKit';
+import { getAddress } from '@ethersproject/address';
+import { getEvents } from '@/components/utils/getEvents';
 
 class UmbraSafe extends Umbra {
 // modification of Umbra's generatePrivateKeys function
@@ -81,6 +84,60 @@ class UmbraSafe extends Umbra {
         return recipients
       }
 
+    async scanSafe(spendingPublicKey: string, viewingPrivateKey: string, overrides: ScanOverrides = {}){
+        console.log("ping")
+        const announcements = await getEvents("Announcement");
+        console.log(announcements)
+        const userAnnouncements = announcements.reduce((userAnns, ann) => {
+        const { amount, from, receiver, timestamp, token: tokenAddr, txHash } = ann.args;
+        const { isForUser, randomNumber } = this.isAnnouncementForSafeUser(spendingPublicKey, viewingPrivateKey, ann);
+        const token = getAddress(tokenAddr); // ensure checksummed address
+        const isWithdrawn = false; // we always assume not withdrawn and leave it to the caller to check
+        if (isForUser) userAnns.push({ randomNumber, receiver, amount, token, from, txHash, timestamp, isWithdrawn });
+        return userAnns;
+        }, [] as UserAnnouncement[]);
+
+        return { userAnnouncements };
+    }
+
+    async isAnnouncementForSafeUser(spendingPublicKey: string, viewingPrivateKey: string, announcement: Announcement) {
+
+        console.log("isAnnouncementForSafeUser", spendingPublicKey, viewingPrivateKey, announcement)
+        try {
+          // Get y-coordinate of public key from the x-coordinate by solving secp256k1 equation
+          const { receiver, pkx, ciphertext } = announcement;
+          const pkxBigNumber = BigNumber.from(pkx);
+          console.log("pkxBigNumber", pkxBigNumber)
+          const uncompressedPubKey = KeyPair.getUncompressedFromX(pkxBigNumber);
+    
+          // Decrypt to get random number
+          const payload = { ephemeralPublicKey: uncompressedPubKey, ciphertext };
+          const viewingKeyPair = new KeyPair(viewingPrivateKey);
+          const randomNumber = viewingKeyPair.decrypt(payload);
+    
+          // Get what our receiving address would be with this random number
+          const spendingKeyPair = new KeyPair(spendingPublicKey);
+          const computedReceivingAddress = spendingKeyPair.mulPublicKey(randomNumber).address;
+
+          // Get Safe owners
+          console.log(receiver)
+          const info = await getSafeInfo(receiver)
+          const owners = info.owners
+          console.log(owners)
+
+          for (let i = 0; i < owners.length; i++) {
+            if (computedReceivingAddress === owners[i]) {
+                return { isForUser: true, randomNumber };
+            }
+          }
+    
+        } catch (err) {
+            console.error(err);
+          // We may reach here if people use the sendToken method improperly, e.g. by passing an invalid pkx, so we'd
+          // fail when uncompressing. For now we just silently ignore these and return false
+          return { isForUser: false, randomNumber: '' };
+        }
+      }
     
 }
 
@@ -123,4 +180,12 @@ export async function genPersonalPrivateKeys(signer: Signer) {
     const umbraSafe = new UmbraSafe(provider, 100);
     const { spendingKeyPair, viewingKeyPair } = await umbraSafe.generatePrivateKeys(signer);
     return { spendingKeyPair: spendingKeyPair, viewingKeyPair: viewingKeyPair};
+}
+
+export async function scanPayments(spendingPublicKey: string, viewingSafePrivateKey: string) {
+    console.log(spendingPublicKey, viewingSafePrivateKey)
+    const provider = new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm")
+    const umbraSafe = new UmbraSafe(provider, 100)
+    const response = await umbraSafe.scanSafe(spendingPublicKey, viewingSafePrivateKey)
+    return response
 }
