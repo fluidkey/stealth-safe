@@ -15,12 +15,13 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle, Typography
+  DialogTitle, IconButton, Typography
 } from "@mui/material";
 import Link from "next/link";
 import {addSafe} from "@/components/safeKeyRegistry/addSafe";
 import {useRouter} from "next/router";
 import SuccessInitialized from "@/ui/organisms/Receive.RegisterSafe/SuccessInitialized";
+import {RefreshRounded} from "@mui/icons-material";
 
 /**
  *
@@ -97,7 +98,7 @@ const ReceiveRegisterSafe: React.FC<IReceiveRegisterSafe> = (props) => {
           <SuccessInitialized/>
           :
           <>
-            <Box>
+            <Box display={"flex"} alignItems={"center"}>
               <Alert severity="warning"
                      action={
                        <Button color="inherit" size="small" onClick={() => setShowDialogToInitialize(true)}>
@@ -107,6 +108,9 @@ const ReceiveRegisterSafe: React.FC<IReceiveRegisterSafe> = (props) => {
               >
                 You need to initialize the Safe
               </Alert>
+              <IconButton size="small" style={{marginLeft: 8}} onClick={() => receiveData.fetchSafeInfo().then()}>
+                <RefreshRounded fontSize="inherit" />
+              </IconButton>
             </Box>
             <Dialog open={showDialogToInitialize}>
               <DialogTitle>
@@ -116,7 +120,7 @@ const ReceiveRegisterSafe: React.FC<IReceiveRegisterSafe> = (props) => {
                 <DialogContentText>
                   You need to Register the Safe in the Safe Stealth View Key Registry.
                 </DialogContentText>
-                <DialogContentText>
+                <DialogContentText style={{marginTop: 4}}>
                   This operation needs to be done once, and allows anyone to send you funds using Stealth Safe mechanism.
                 </DialogContentText>
                 <Box display={"flex"} justifyContent={"center"} width={"100%"} mt={2}>
@@ -141,14 +145,17 @@ const ReceiveRegisterSafe: React.FC<IReceiveRegisterSafe> = (props) => {
                                </Button>
                              }
                       >
-                        Transaction sent! Go to Gnosis, sign and send it!
+                        Transaction sent! Go to Safe App to confirm it
                       </Alert>
                     )
                   }
                 </Box>
               </DialogContent>
               <DialogActions>
-                <Button onClick={() => {setShowDialogToInitialize(false)}}
+                <Button onClick={() => {
+                  if (internalInitializationState === "sent") receiveData.fetchSafeInfo().then();
+                  setShowDialogToInitialize(false);
+                }}
                         disabled={internalInitializationState === "sending"}
                 >
                   Close

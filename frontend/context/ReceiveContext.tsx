@@ -1,6 +1,9 @@
 // ReceiveContext.tsx
-import React, { createContext, useContext, useState } from 'react';
+import React, {createContext, useCallback, useContext, useState} from 'react';
 import {KeyPair} from "umbra/umbra-js/src/";
+import {getSafeInfo} from "@/components/safe/safeApiKit";
+import {getStealthKeys} from "@/components/umbra/getStealthKeys";
+import {generateAddress} from "@/components/umbra/generateAddressFromKey";
 
 export interface UserStealthAddress {
   owner: string;
@@ -32,6 +35,8 @@ type ReceiveContextType = {
   setSafeViewKey: React.Dispatch<React.SetStateAction<SafeViewKey | undefined>>;
   setAreAllSafeOwnersInitialized: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setIsSelectedSafeInitialized: React.Dispatch<React.SetStateAction<boolean | undefined>>;
+
+  fetchSafeInfo: () => Promise<void>
 };
 
 // Initial state
@@ -50,6 +55,7 @@ const initialReceiveState: ReceiveContextType = {
   setSafeViewKey: () => {},
   setAreAllSafeOwnersInitialized: () => {},
   setIsSelectedSafeInitialized: () => {},
+  fetchSafeInfo: async () => {}
 };
 
 // Create context
@@ -70,6 +76,31 @@ export const ReceiveProvider: React.FC<React.PropsWithChildren<{}>> = ({ childre
   const [areAllSafeOwnersInitialized, setAreAllSafeOwnersInitialized] = useState<boolean | undefined>(undefined);
   const [isSelectedSafeInitialized, setIsSelectedSafeInitialized] = useState<boolean | undefined>(undefined);
 
+  // retrieve the info of the safe and of the owners of it
+  const fetchSafeInfo = useCallback(async () => {
+    setSelectedSafeOwners([]);
+    setAreAllSafeOwnersInitialized(undefined);
+    setOwnersStealthKeys([]);
+    const safeInfo = await getSafeInfo(selectedSafe)
+    const owners = safeInfo.owners;
+    setSelectedSafeOwners(owners);
+    let safeStealthKeysArray: any = []
+    for (let i = 0; i < owners.length; i++) {
+      const safeStealthKeys = await getStealthKeys(owners[i]) as any
+      if (safeStealthKeys.error) {
+        setAreAllSafeOwnersInitialized(false);
+        console.log("Make sure all owners have registered their stealth keys.");
+        return;
+      } else {
+        setAreAllSafeOwnersInitialized(true);
+        safeStealthKeys["owner"] = owners[i]
+        safeStealthKeys["address"] = await generateAddress(safeStealthKeys.viewingPublicKey)
+        safeStealthKeysArray.push(safeStealthKeys)
+      }
+    }
+    setOwnersStealthKeys(safeStealthKeysArray);
+  }, [selectedSafe, getSafeInfo, getStealthKeys, generateAddress]);
+
   return (
     <ReceiveContext.Provider value={{
       safes,
@@ -85,7 +116,8 @@ export const ReceiveProvider: React.FC<React.PropsWithChildren<{}>> = ({ childre
       setOwnersStealthKeys,
       setSafeViewKey,
       setAreAllSafeOwnersInitialized,
-      setIsSelectedSafeInitialized
+      setIsSelectedSafeInitialized,
+      fetchSafeInfo
     }}>
       {children}
     </ReceiveContext.Provider>
