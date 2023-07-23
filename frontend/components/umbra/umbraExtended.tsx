@@ -7,7 +7,7 @@ import { getSafeInfo } from '../safe/safeApiKit';
 import { getAddress } from '@ethersproject/address';
 import { getEvents } from '@/components/utils/getEvents';
 
-class UmbraSafe extends Umbra {
+export class UmbraSafe extends Umbra {
 // modification of Umbra's generatePrivateKeys function
         async generateSafePrivateKeys(signer: Signer){
             // Base message that will be signed
@@ -59,6 +59,9 @@ class UmbraSafe extends Umbra {
         const viewingPubKeyUncompressed = KeyPair.getUncompressedFromX(viewingPubKey, Number(viewingPubKeyPrefix))
 
         const randomNumber = new RandomNumber();
+
+        console.log("randomNumber", randomNumber);
+        console.log("randomNumber.asHex", randomNumber.asHex);
 
         const viewingKeyPair = new KeyPair(viewingPubKeyUncompressed);
 

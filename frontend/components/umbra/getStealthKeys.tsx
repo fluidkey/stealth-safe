@@ -1,5 +1,5 @@
-import { StealthKeyRegistry } from "@umbracash/umbra-js"
 import { ethers } from "ethers"
+import {StealthKeyRegistry} from "umbra/umbra-js/src";
 
 const provider = new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm")
 const registry = new StealthKeyRegistry(provider)
