@@ -15,6 +15,9 @@ import {getKeyShortAddress} from "@/utils/web3/address";
 import Link from "next/link";
 import { format } from 'date-fns';
 import {theme} from "@/GlobalStyles";
+import WithdrawButton from "@/ui/organisms/Receive.ListOfWithdrawals/WithdrawButton";
+import {WithdrawSafe} from "@/context/ReceiveContext";
+import {BigNumber} from "ethers";
 
 
 /**
@@ -26,22 +29,24 @@ import {theme} from "@/GlobalStyles";
 const ReceiveListOfWithdrawals: React.FC<IReceiveListOfWithdrawals> = (props) => {
 
 
-  const rows = [{
+  const rows: WithdrawSafe[] = [{
     date: 1690032903,
-    amount: 100,
+    amount: BigNumber.from(100),
     sender: "0xc08Fe093893db3A81766BCD1464a1a288C80F043",
     stealthSafeReceiver: "0x890E76Ef50B16Da99564Dce0ef7Ee554a35e5e55",
-    hasBeenWithdrawn: false,
+    randomNumber: "0x1233223344",
     hasBeenInitiated: false,
     hasBeenExecuted: false,
+    hasBeenWithdrawn: false,
   }, {
     date: 1690014900,
-    amount: 80,
+    amount: BigNumber.from(80),
     sender: "0xc08Fe093893db3A81766BCD1464a1a288C80F043",
     stealthSafeReceiver: "0x890E76Ef50B16Da99564Dce0ef7Ee554a35e5e55",
-    hasBeenWithdrawn: true,
-    hasBeenInitiated: false,
+    randomNumber: "0x1233223344",
+    hasBeenInitiated: true,
     hasBeenExecuted: false,
+    hasBeenWithdrawn: false,
   }]
 
 
@@ -53,8 +58,8 @@ const ReceiveListOfWithdrawals: React.FC<IReceiveListOfWithdrawals> = (props) =>
             <TableRow>
               <TableCell>Date Received</TableCell>
               <TableCell align={"right"}>Amount</TableCell>
-              <TableCell>Sender</TableCell>
-              <TableCell>Stealth Receiver</TableCell>
+              <TableCell align="right">Sender</TableCell>
+              <TableCell align="right">Stealth Receiver</TableCell>
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
@@ -74,7 +79,7 @@ const ReceiveListOfWithdrawals: React.FC<IReceiveListOfWithdrawals> = (props) =>
                 </TableCell>
                 <TableCell align="right">
                   <Box sx={{display: "flex", alignItems: "baseline", justifyContent: "end"}} gap={0.5}>
-                    <Typography>{row.amount}</Typography>
+                    <Typography>{row.amount.toNumber()}</Typography>
                     {/*<img src={"/xdai_logo.webp"} width={15} height={15}/>*/}
                     <Typography fontSize={13}>xDAI</Typography>
                   </Box>
@@ -90,7 +95,7 @@ const ReceiveListOfWithdrawals: React.FC<IReceiveListOfWithdrawals> = (props) =>
                   </Link>
                 </TableCell>
                 <TableCell align="right">
-                  <Button>Withdraw</Button>
+                  <WithdrawButton withdrawSafeData={row}/>
                 </TableCell>
               </TableRow>
             ))}

@@ -567,6 +567,14 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
+"@gelatonetwork/relay-sdk@^3.1.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@gelatonetwork/relay-sdk/-/relay-sdk-3.5.0.tgz#f8592b17492a582421dbeea39ec03180f82d20f3"
+  integrity sha512-oj4rFH09yzFT4wnYCv7V3bZCIVhpuKbnK5jv0fgzclxTbbA6UEWZErn3QiD13yspiIkKafSgMWT0G8z41CINYg==
+  dependencies:
+    axios "0.24.0"
+    ethers "5.7.2"
+
 "@ledgerhq/connect-kit-loader@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/connect-kit-loader/-/connect-kit-loader-1.1.0.tgz#10343b78ef13436818bf3453568a559c0eeb9d48"
@@ -882,6 +890,16 @@
     web3 "^1.8.1"
     web3-core "^1.8.1"
     web3-utils "^1.8.1"
+
+"@safe-global/relay-kit@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@safe-global/relay-kit/-/relay-kit-1.2.0.tgz#d9b90e8ae2912a52866728e0c1b212eab159fab2"
+  integrity sha512-x2LlAwMUPBZS2SA2qU1kv7dyvQKzQaqFSyIHwy7bVzwbeV79/YhOzc8fb2rVT889hRDAUnzOg98da47wFFYfBw==
+  dependencies:
+    "@gelatonetwork/relay-sdk" "^3.1.0"
+    "@safe-global/protocol-kit" "^1.2.0"
+    "@safe-global/safe-core-sdk-types" "^2.2.0"
+    ethers "^5.7.2"
 
 "@safe-global/safe-apps-provider@^0.17.1":
   version "0.17.1"
@@ -1875,6 +1893,13 @@ aws4@^1.8.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.12.0.tgz#ce1c9d143389679e253b314241ea9aa5cec980d3"
   integrity sha512-NmWvPnx0F1SfrQbYwOi7OeaNGokp9XhzNioJ/CSBs8Qa4vxug81mhJEAVZwxXuBmYB5KDRfMq/F3RR0BIU7sWg==
+
+axios@0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.24.0.tgz#804e6fa1e4b9c5288501dd9dff56a7a0940d20d6"
+  integrity sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==
+  dependencies:
+    follow-redirects "^1.14.4"
 
 babel-plugin-macros@^3.1.0:
   version "3.1.0"
@@ -2948,6 +2973,11 @@ find-up@^4.1.0:
   dependencies:
     locate-path "^5.0.0"
     path-exists "^4.0.0"
+
+follow-redirects@^1.14.4:
+  version "1.15.2"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
+  integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
 
 for-each@^0.3.3:
   version "0.3.3"

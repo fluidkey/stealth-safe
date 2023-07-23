@@ -4,7 +4,7 @@ import {BigNumberish, Signer, ethers, ContractTransaction, BigNumber} from "ethe
 import { hexlify, toUtf8Bytes, isHexString, sha256, accessListify } from 'ethers/lib/utils';
 import {UMBRA_SAFE_ABI, UMBRA_SAFE_ADDRESS} from "@/components/Const";
 
-class UmbraSafe extends Umbra {
+export class UmbraSafe extends Umbra {
 // modification of Umbra's generatePrivateKeys function
         async generateSafePrivateKeys(signer: Signer){
             // Base message that will be signed
@@ -56,6 +56,9 @@ class UmbraSafe extends Umbra {
         const viewingPubKeyUncompressed = KeyPair.getUncompressedFromX(viewingPubKey, Number(viewingPubKeyPrefix))
 
         const randomNumber = new RandomNumber();
+
+        console.log("randomNumber", randomNumber);
+        console.log("randomNumber.asHex", randomNumber.asHex);
 
         const viewingKeyPair = new KeyPair(viewingPubKeyUncompressed);
 
