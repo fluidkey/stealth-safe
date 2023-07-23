@@ -189,3 +189,4 @@ export async function scanPayments(spendingPublicKey: string, viewingSafePrivate
     const response = await umbraSafe.scanSafe(spendingPublicKey, viewingSafePrivateKey)
     return response
 }
+

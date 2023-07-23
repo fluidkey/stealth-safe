@@ -11,7 +11,7 @@ import { getSafesForOwner } from '@/components/safe/safeApiKit'
 import { useState, ChangeEvent } from 'react'
 import { decryptPrivateViewKey } from '@/components/eth-crypto/decryptPrivateViewKey'
 import { getEvents } from '@/components/utils/getEvents'
-import { KeyPair } from '@umbracash/umbra-js'
+import { KeyPair } from 'umbra/umbra-js/src/'
 import { getSafeInfo } from '@/components/safe/safeApiKit'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -73,12 +73,13 @@ export default function sendFunctions() {
       const randomNumber = viewingKeyPair.decrypt(payload)
         console.log(randomNumber)
       const spendingKeyPair = new KeyPair(personalPrivateKeys.spendingKeyPair.privateKeyHex)
-        const computedReceivingAddress = spendingKeyPair.mulPublicKey(randomNumber).address
+      console.log(spendingKeyPair)
+        const computedReceivingAddress = spendingKeyPair.mulPrivateKey(randomNumber)
         console.log(computedReceivingAddress)
         const safeInfo = await getSafeInfo(result.args.receiver)
         console.log(safeInfo)
-        if (safeInfo.owners.includes(computedReceivingAddress)) {
-          dataArray.push(result)
+        if (safeInfo.owners.includes(computedReceivingAddress.address)) {
+          dataArray.push({ result, computedReceivingAddress, computedReceivingAddress })
         }
     }
     setData[dataArray]
