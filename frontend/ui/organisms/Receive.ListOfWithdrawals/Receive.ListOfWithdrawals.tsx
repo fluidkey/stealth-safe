@@ -82,6 +82,7 @@ const ReceiveListOfWithdrawals: React.FC<IReceiveListOfWithdrawals> = (props) =>
         dataArray.push({ result, computedReceivingAddress, randomNumber })
       }
     }
+    console.log(dataArray)
     return dataArray.map(d => ({
       // @ts-ignore
       date: d.result.timestamp,

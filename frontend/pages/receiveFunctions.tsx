@@ -79,7 +79,7 @@ export default function sendFunctions() {
         const safeInfo = await getSafeInfo(result.args.receiver)
         console.log(safeInfo)
         if (safeInfo.owners.includes(computedReceivingAddress.address)) {
-          dataArray.push({ result, computedReceivingAddress, computedReceivingAddress })
+          dataArray.push({ result, computedReceivingAddress })
         }
     }
     setData[dataArray]

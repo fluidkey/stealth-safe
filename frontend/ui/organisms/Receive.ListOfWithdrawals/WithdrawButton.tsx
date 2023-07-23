@@ -161,14 +161,16 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       safeAddress: props.withdrawSafeData.stealthSafeReceiver
     })
     const relayKit = new GelatoRelayPack()
-    const safeTransaction = await relayKit.createRelayedTransaction(
+    const safeTransaction = await relayKit.relayTransaction(
       safeSDK,
       [safeTransactionData],
       options
     )
+
+    console.log("safeTransaction", safeTransaction);
     const signedSafeTx = await safeSDK.signTransaction(safeTransaction)
 
-    console.log("wallet.getAddress()", await wallet.getAddress());
+    console.log("wallet.getAddress()", await wallet.getAddress(), "safe", props.withdrawSafeData.stealthSafeReceiver);
 
     const transactionConfig = {
       safeAddress: props.withdrawSafeData.stealthSafeReceiver,
@@ -180,6 +182,7 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
     } as unknown as ProposeTransactionProps
 
     const propose = await safeService.proposeTransaction(transactionConfig)
+    console.log(propose)
 
   }, [props, pendingSafeTxs, signer, account]);
 
@@ -193,8 +196,10 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
     // if we're here, means we've not yet a tx to sign
     // Any address can be used for destination. In this example, we use vitalik.eth
     const destinationAddress = '0xb250c202310da0b15b82E985a30179e74f414457'
-    const amount = props.withdrawSafeData.amount.toString();
-    const gasLimit = '500000'
+    console.log("props.withdrawSafeData.amount", props.withdrawSafeData.amount.toString())
+    const amount = ((props.withdrawSafeData.amount).sub(9000000000000000)).toString();
+    console.log(amount)
+    const gasLimit = '3000000'
     const safeTransactionData = {
       to: destinationAddress,
       data: '0x',// leave blank for native token transfers
@@ -223,6 +228,9 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       [safeTransactionData],
       options
     )
+
+    console.log("safe", props.withdrawSafeData.stealthSafeReceiver)
+    console.log("safeTransaction", safeTransaction)
     const signedSafeTx = await safeSDK.signTransaction(safeTransaction)
     const safeSingletonContract = await getSafeContract({ ethAdapter, safeVersion: await safeSDK.getContractVersion() })
 
@@ -239,6 +247,8 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       signedSafeTx.encodedSignatures()
     ])
 
+    console.log(encodedTx)
+
     const response = await relayKit.relayTransaction({
       target: props.withdrawSafeData.stealthSafeReceiver,
       encodedTransaction: encodedTx,
@@ -246,7 +256,7 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       options: options
     })
 
-
+    console.log(response)
 
 
 

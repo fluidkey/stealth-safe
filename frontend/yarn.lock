@@ -876,7 +876,7 @@
     "@safe-global/safe-core-sdk-types" "^2.2.0"
     node-fetch "^2.6.6"
 
-"@safe-global/protocol-kit@^1.2.0":
+"@safe-global/protocol-kit@^1.0.0", "@safe-global/protocol-kit@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@safe-global/protocol-kit/-/protocol-kit-1.2.0.tgz#5501fa0e2a1b4ad03cd5a4ee12bb9e799e1dd5a7"
   integrity sha512-drU2uK30AZ4tqI/9ER7PGMD/lZp/5B9T02t+noTk7WF9Xb7HxskJd8GNU01KE55oyH31Y0AfXaE68H/f9lYa4A==
@@ -891,14 +891,14 @@
     web3-core "^1.8.1"
     web3-utils "^1.8.1"
 
-"@safe-global/relay-kit@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@safe-global/relay-kit/-/relay-kit-1.2.0.tgz#d9b90e8ae2912a52866728e0c1b212eab159fab2"
-  integrity sha512-x2LlAwMUPBZS2SA2qU1kv7dyvQKzQaqFSyIHwy7bVzwbeV79/YhOzc8fb2rVT889hRDAUnzOg98da47wFFYfBw==
+"@safe-global/relay-kit@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@safe-global/relay-kit/-/relay-kit-1.0.0.tgz#e2762badb6d9397acef05e8587f26fdc4553b5d0"
+  integrity sha512-kOFxOoXDd2ZfLH3r2kUocZquhfY/V0K4AXzzFzVU2W8f89XzfgiG3ibjftMMuW650WUG5mHB8sXEcjSilPXviA==
   dependencies:
     "@gelatonetwork/relay-sdk" "^3.1.0"
-    "@safe-global/protocol-kit" "^1.2.0"
-    "@safe-global/safe-core-sdk-types" "^2.2.0"
+    "@safe-global/protocol-kit" "^1.0.0"
+    "@safe-global/safe-core-sdk-types" "^2.0.0"
     ethers "^5.7.2"
 
 "@safe-global/safe-apps-provider@^0.17.1":
@@ -917,7 +917,7 @@
     "@safe-global/safe-gateway-typescript-sdk" "^3.5.3"
     viem "^1.0.0"
 
-"@safe-global/safe-core-sdk-types@^2.2.0":
+"@safe-global/safe-core-sdk-types@^2.0.0", "@safe-global/safe-core-sdk-types@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@safe-global/safe-core-sdk-types/-/safe-core-sdk-types-2.2.0.tgz#2e34a5089035719e9a92a0bc6aa181c2edb0f108"
   integrity sha512-vVG9qQnUYx+Xwsbuqraq25MPJX1I1aV1P81ZnHZa1lEMU7stqYWAmykUm/mvqsm8+AsvEB/wBKlFjbFJ/duzoA==
