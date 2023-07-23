@@ -8,6 +8,5 @@ export async function decryptPrivateViewKey(ownerPrivateViewingKey: string, safe
         ownerPrivateViewingKey,
         decompressedEncryptedPrivateViewKey
     )
-    console.log(decryptedPrivateViewKey)
-    return decryptPrivateViewKey
+    return decryptedPrivateViewKey
 }
