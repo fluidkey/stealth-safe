@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
+  accordionClasses,
   Alert,
   Box,
   Button,
@@ -25,6 +26,8 @@ import Safe, {EthersAdapter, getSafeContract} from "@safe-global/protocol-kit";
 import {genPersonalPrivateKeys, UmbraSafe} from "@/components/umbra/umbraExtended";
 import safeService from "@/components/safe/safeEthersAdapter";
 import {KeyPair} from "umbra/umbra-js/src/";
+import {ProposeTransactionProps} from "@safe-global/api-kit";
+import {useAccount} from "wagmi";
 
 /**
  *
@@ -35,6 +38,7 @@ import {KeyPair} from "umbra/umbra-js/src/";
 const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
 
   const signer = useEthersSigner();
+  const account = useAccount();
 
   const [pendingSafeTxs, setPendingSafeTxs] = useState<SafeMultisigTransactionResponse[]>([]);
   const [hasCheckPendingTxsRun, setHasCheckPendingTxsRun] = useState<boolean>(false);
@@ -77,45 +81,63 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       })
       const safeSingletonContract = await getSafeContract({ ethAdapter, safeVersion: await safeSDK.getContractVersion() })
       const pendingTx = pendingSafeTxs[0];
-      const encodedTx = safeSingletonContract.encode('execTransaction', [
+      console.log("pendingTx", pendingTx);
+      console.log("full arrat", [
         pendingTx.to,
         pendingTx.value,
-        pendingTx.data,
+        "0x",
         pendingTx.operation,
         pendingTx.safeTxGas,
         pendingTx.baseGas,
         pendingTx.gasPrice,
         pendingTx.gasToken,
         pendingTx.refundReceiver,
-        pendingTx.signatures  // TODO in the example was .encodedSignetures()
+        // @ts-ignore
+        pendingTx.confirmations[0].signature
+      ]);
+      const encodedTx = safeSingletonContract.encode('execTransaction', [
+        pendingTx.to,
+        pendingTx.value,
+        "0x",
+        pendingTx.operation,
+        pendingTx.safeTxGas,
+        pendingTx.baseGas,
+        pendingTx.gasPrice,
+        pendingTx.gasToken,
+        pendingTx.refundReceiver,
+        // @ts-ignore
+        pendingTx.confirmations[0].signature
       ])
       const relayKit = new GelatoRelayPack()
       const options = {
-        gasLimit: '200000',
+        gasLimit: '500000'
       }
+      console.log("encodedTx", encodedTx);
       const response = await relayKit.relayTransaction({
         target: props.withdrawSafeData.stealthSafeReceiver,
         encodedTransaction: encodedTx,
         chainId: 100,
         options: options
       })
+      console.log(`Relay Transaction Task ID: https://relay.gelato.digital/tasks/status/${response.taskId}`)
     } else {
       // still sign are missing
       setShowDialogWithMissingSigns(true);
     }
-  }, []);
+  }, [pendingSafeTxs, getEthAdapter, props, getSafeContract]);
 
   // launch the correct logic based on the fact that there are already txs or not
   const startWithdraw = useCallback(async () => {
-    if (pendingSafeTxs.length > 0) {
-      await signAndExecute();
-      return;
-    }
+    // if (pendingSafeTxs.length > 0) {
+    //   await signAndExecute();
+    //   return;
+    // }
+
     // if we're here, means we've not yet a tx to sign
     // Any address can be used for destination. In this example, we use vitalik.eth
     const destinationAddress = '0xb250c202310da0b15b82E985a30179e74f414457'
-    const amount = ethers.utils.parseUnits(props.withdrawSafeData.amount.sub(7*200000).toString(), 'ether').toString()
-    const gasLimit = '200000'
+    const amount = props.withdrawSafeData.amount.toString();
+    const gasLimit = '500000'
     const safeTransactionData = {
       to: destinationAddress,
       data: '0x',// leave blank for native token transfers
@@ -123,9 +145,17 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       operation: OperationType.Call
     }
     const options = {
-      gasLimit,
+      gasLimit
     }
-    const ethAdapter = await getEthAdapter();
+    // const ethAdapter = await getEthAdapter();
+    const provider = new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm");
+    const privateKey = await genPersonalPrivateKeys(signer as Signer);
+    const userStealthPrivateKey = UmbraSafe.computeStealthPrivateKey(privateKey.spendingKeyPair.privateKeyHex as string, props.withdrawSafeData.randomNumber);
+    const wallet = new ethers.Wallet(userStealthPrivateKey, provider);
+    const ethAdapter = new EthersAdapter({
+      ethers,
+      signerOrProvider: wallet
+    });
     const safeSDK = await Safe.create({
       ethAdapter,
       safeAddress: props.withdrawSafeData.stealthSafeReceiver
@@ -137,7 +167,21 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       options
     )
     const signedSafeTx = await safeSDK.signTransaction(safeTransaction)
-  }, [props, pendingSafeTxs, signer]);
+
+    console.log("wallet.getAddress()", await wallet.getAddress());
+
+    const transactionConfig = {
+      safeAddress: props.withdrawSafeData.stealthSafeReceiver,
+      safeTransactionData: safeTransaction.data,
+      safeTxHash: await safeSDK.getTransactionHash(safeTransaction),
+      senderAddress: await wallet.getAddress(),
+      senderSignature: signedSafeTx.encodedSignatures(),
+      origin: "withdraw"
+    } as unknown as ProposeTransactionProps
+
+    const propose = await safeService.proposeTransaction(transactionConfig)
+
+  }, [props, pendingSafeTxs, signer, account]);
 
   return (
     <>
