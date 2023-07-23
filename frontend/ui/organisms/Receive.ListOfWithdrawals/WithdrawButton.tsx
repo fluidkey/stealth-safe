@@ -183,6 +183,93 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
 
   }, [props, pendingSafeTxs, signer, account]);
 
+  // launch the correct logic based on the fact that there are already txs or not
+  const startWithdrawDirect = useCallback(async () => {
+    // if (pendingSafeTxs.length > 0) {
+    //   await signAndExecute();
+    //   return;
+    // }
+
+    // if we're here, means we've not yet a tx to sign
+    // Any address can be used for destination. In this example, we use vitalik.eth
+    const destinationAddress = '0xb250c202310da0b15b82E985a30179e74f414457'
+    const amount = props.withdrawSafeData.amount.toString();
+    const gasLimit = '500000'
+    const safeTransactionData = {
+      to: destinationAddress,
+      data: '0x',// leave blank for native token transfers
+      value: amount,
+      operation: OperationType.Call
+    }
+    const options = {
+      gasLimit
+    }
+    // const ethAdapter = await getEthAdapter();
+    const provider = new ethers.providers.JsonRpcProvider("https://rpc.gnosis.gateway.fm");
+    const privateKey = await genPersonalPrivateKeys(signer as Signer);
+    const userStealthPrivateKey = UmbraSafe.computeStealthPrivateKey(privateKey.spendingKeyPair.privateKeyHex as string, props.withdrawSafeData.randomNumber);
+    const wallet = new ethers.Wallet(userStealthPrivateKey, provider);
+    const ethAdapter = new EthersAdapter({
+      ethers,
+      signerOrProvider: wallet
+    });
+    const safeSDK = await Safe.create({
+      ethAdapter,
+      safeAddress: props.withdrawSafeData.stealthSafeReceiver
+    })
+    const relayKit = new GelatoRelayPack()
+    const safeTransaction = await relayKit.createRelayedTransaction(
+      safeSDK,
+      [safeTransactionData],
+      options
+    )
+    const signedSafeTx = await safeSDK.signTransaction(safeTransaction)
+    const safeSingletonContract = await getSafeContract({ ethAdapter, safeVersion: await safeSDK.getContractVersion() })
+
+    const encodedTx = safeSingletonContract.encode('execTransaction', [
+      signedSafeTx.data.to,
+      signedSafeTx.data.value,
+      signedSafeTx.data.data,
+      signedSafeTx.data.operation,
+      signedSafeTx.data.safeTxGas,
+      signedSafeTx.data.baseGas,
+      signedSafeTx.data.gasPrice,
+      signedSafeTx.data.gasToken,
+      signedSafeTx.data.refundReceiver,
+      signedSafeTx.encodedSignatures()
+    ])
+
+    const response = await relayKit.relayTransaction({
+      target: props.withdrawSafeData.stealthSafeReceiver,
+      encodedTransaction: encodedTx,
+      chainId: 100,
+      options: options
+    })
+
+
+
+
+
+
+
+
+    // const signedSafeTx = await safeSDK.signTransaction(safeTransaction)
+    //
+    // console.log("wallet.getAddress()", await wallet.getAddress());
+    //
+    // const transactionConfig = {
+    //   safeAddress: props.withdrawSafeData.stealthSafeReceiver,
+    //   safeTransactionData: safeTransaction.data,
+    //   safeTxHash: await safeSDK.getTransactionHash(safeTransaction),
+    //   senderAddress: await wallet.getAddress(),
+    //   senderSignature: signedSafeTx.encodedSignatures(),
+    //   origin: "withdraw"
+    // } as unknown as ProposeTransactionProps
+    //
+    // const propose = await safeService.proposeTransaction(transactionConfig)
+
+  }, [props, pendingSafeTxs, signer, account]);
+
   return (
     <>
       {
@@ -205,7 +292,7 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       {
         !props.withdrawSafeData.hasBeenWithdrawn && !props.withdrawSafeData.hasBeenExecuted ?
           <>
-            <Button variant={"contained"} onClick={startWithdraw} disabled={!hasCheckPendingTxsRun}>
+            <Button variant={"contained"} onClick={startWithdrawDirect} disabled={!hasCheckPendingTxsRun}>
               Withdraw
             </Button>
             <Dialog open={showDialogWithMissingSigns}>

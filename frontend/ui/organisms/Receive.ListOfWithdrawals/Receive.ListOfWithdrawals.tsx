@@ -82,18 +82,6 @@ const ReceiveListOfWithdrawals: React.FC<IReceiveListOfWithdrawals> = (props) =>
         dataArray.push({ result, computedReceivingAddress, randomNumber })
       }
     }
-    console.log("dataArray", dataArray.map(d => ({
-      // @ts-ignore
-      date: d.result.timestamp,
-      amount: d.result.args[1],
-      // @ts-ignore
-      sender: d.result.sender,
-      randomNumber: d.randomNumber,
-      stealthSafeReceiver: d.result.args[0],
-      hasBeenWithdrawn: false,
-      hasBeenExecuted: false,
-      hasBeenInitiated: false
-    })));
     return dataArray.map(d => ({
       // @ts-ignore
       date: d.result.timestamp,
@@ -107,27 +95,6 @@ const ReceiveListOfWithdrawals: React.FC<IReceiveListOfWithdrawals> = (props) =>
       hasBeenInitiated: false
     }))
   }
-
-  // const rows: WithdrawSafe[] = [{
-  //   date: 1690032903,
-  //   amount: BigNumber.from(100),
-  //   sender: "0xc08Fe093893db3A81766BCD1464a1a288C80F043",
-  //   stealthSafeReceiver: "0x890E76Ef50B16Da99564Dce0ef7Ee554a35e5e55",
-  //   randomNumber: "0x1233223344",
-  //   hasBeenInitiated: false,
-  //   hasBeenExecuted: false,
-  //   hasBeenWithdrawn: false,
-  // }, {
-  //   date: 1690014900,
-  //   amount: BigNumber.from(80),
-  //   sender: "0xc08Fe093893db3A81766BCD1464a1a288C80F043",
-  //   stealthSafeReceiver: "0x890E76Ef50B16Da99564Dce0ef7Ee554a35e5e55",
-  //   randomNumber: "0x1233223344",
-  //   hasBeenInitiated: true,
-  //   hasBeenExecuted: false,
-  //   hasBeenWithdrawn: false,
-  // }]
-
 
   return (
     <>
