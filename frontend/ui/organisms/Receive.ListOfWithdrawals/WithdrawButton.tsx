@@ -28,6 +28,7 @@ import safeService from "@/components/safe/safeEthersAdapter";
 import {KeyPair} from "umbra/umbra-js/src/";
 import {ProposeTransactionProps} from "@safe-global/api-kit";
 import {useAccount} from "wagmi";
+import { estimateGas } from '@/components/safe/safeApiKit';
 
 /**
  *
@@ -197,9 +198,19 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
     // Any address can be used for destination. In this example, we use vitalik.eth
     const destinationAddress = '0xb250c202310da0b15b82E985a30179e74f414457'
     console.log("props.withdrawSafeData.amount", props.withdrawSafeData.amount.toString())
-    const amount = ((props.withdrawSafeData.amount).sub(9000000000000000)).toString();
+
+    const relayKit = new GelatoRelayPack()
+    const gasLimit = '210000'
+    const fee = await relayKit.getEstimateFee(100, gasLimit)
+    console.log("fee", fee)
+
+    const finalFee = ((BigNumber.from(fee)).mul(BigNumber.from("102"))).div(BigNumber.from("100"))
+
+    console.log("finalFee", finalFee)
+
+    const amount = ((props.withdrawSafeData.amount).sub(finalFee)).toString();
     console.log(amount)
-    const gasLimit = '3000000'
+  
     const safeTransactionData = {
       to: destinationAddress,
       data: '0x',// leave blank for native token transfers
@@ -222,12 +233,16 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       ethAdapter,
       safeAddress: props.withdrawSafeData.stealthSafeReceiver
     })
-    const relayKit = new GelatoRelayPack()
+    
     const safeTransaction = await relayKit.createRelayedTransaction(
       safeSDK,
       [safeTransactionData],
       options
     )
+
+    // const estimatedGas = await estimateGas(props.withdrawSafeData.stealthSafeReceiver, safeTransaction.data)
+    // console.log("estimatedGas", estimatedGas)
+    // not accurate, find another way to estimate gas so we can estimate the Gelato fee correctly, hardcoded for now
 
     console.log("safe", props.withdrawSafeData.stealthSafeReceiver)
     console.log("safeTransaction", safeTransaction)
@@ -254,9 +269,9 @@ const WithdrawButton: React.FC<IWithdrawButton> = (props) => {
       encodedTransaction: encodedTx,
       chainId: 100,
       options: options
-    })
+    }) 
 
-    console.log(response)
+    console.log(response) 
 
 
 

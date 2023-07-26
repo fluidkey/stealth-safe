@@ -10,3 +10,8 @@ export async function getSafeInfo(safeAddress: string) {
     return safeInfo
 }
 
+export async function estimateGas(safeAddress: string, safeTransaction: any) {
+    const gasEstimate = await safeService.estimateSafeTransaction(safeAddress, safeTransaction)
+    return gasEstimate
+}
+
