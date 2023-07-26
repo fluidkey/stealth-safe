@@ -16,10 +16,11 @@ With Stealth Safes, a sender deploys a Safe mirroring the parameters of its pare
 
 ## Links
 
-## Awards
-
-The proof of concept for Stealth Safes has been recognized with the following awards at EthGlobal Paris 2023:
-* 🏆 Gnosis Chain — Best Safe Project
-* 🏆 Safe — 🥇 Safe{Core} AA
+* [Initial implementation proposal](https://statuesque-shirt-254.notion.site/Stealth-Addresses-for-Safe-ad86245b95864289836fb360ed2427e1)
+* [POC for Stealth Safes developed at EthGlobal Paris 2023](https://ethglobal.com/showcase/stealth-safes-n6aj5):
+    * 🏆 Gnosis Chain — Best Safe Project
+    * 🏆 Safe — 🥇 Safe{Core} AA
 
 ## Contribute
+
+Contributions are welcome! Check issues in this repo and feel free to reach out.
