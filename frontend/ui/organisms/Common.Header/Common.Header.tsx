@@ -30,7 +30,7 @@ const CommonHeader: React.FC<ICommonHeader> = (props) => {
            justifyContent={"center"}
            position={"relative"}
       >
-        <Link href={"/home"} style={{textDecoration: "none", color: theme.palette.text.primary}}>
+        <Link href={"/"} style={{textDecoration: "none", color: theme.palette.text.primary}}>
           <Box display={"flex"}
                flexDirection={"row"}
                alignItems={"center"}

@@ -11,6 +11,7 @@ import {theme} from "@/GlobalStyles";
 import {Container, CssBaseline} from "@mui/material";
 import {ReceiveProvider} from "@/context/ReceiveContext";
 import {SendProvider} from "@/context/SendContext";
+import Head from 'next/head'
 
 const chains = [gnosis]
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_ID as string
@@ -33,6 +34,10 @@ export default function App({ Component, pageProps }: AppProps) {
           <Container maxWidth="lg">
             <ReceiveProvider>
               <SendProvider>
+                <Head>
+                  <title>Stealth Safe - A POC by Sefu project</title>
+                  <link rel="icon" href="/favicon.ico" />
+                </Head>
                 <Component {...pageProps} />
               </SendProvider>
             </ReceiveProvider>
