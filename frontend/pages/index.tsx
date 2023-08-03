@@ -3,6 +3,8 @@ import {Box, Button, Typography} from "@mui/material";
 import {Web3Button} from "@web3modal/react";
 import {useAccount} from "wagmi";
 import {useRouter} from "next/router";
+import {theme} from "@/GlobalStyles";
+import {useIsMobile} from "@/hooks/ui/mediaQueryHooks";
 
 /**
  *
@@ -14,6 +16,7 @@ const Index: React.FC<IHome> = (props) => {
 
   const account = useAccount();
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   const [isAccountConnected, setIsAccountConnected] = useState<boolean>(false);
 
@@ -28,9 +31,11 @@ const Index: React.FC<IHome> = (props) => {
          alignItems={"center"}
          justifyContent={"center"}
          minHeight={"70vh"}
-         flexDirection={"column"}>
+         flexDirection={"column"}
+         mt={5}
+    >
       <Box display={"flex"}
-           flexDirection={"row"}
+           flexDirection={isMobile ? "column" : "row"}
            alignItems={"center"}
            mb={1}
       >
@@ -38,13 +43,13 @@ const Index: React.FC<IHome> = (props) => {
           Stealth
         </Typography>
         <img src={"/safe_logo.png"}
-             style={{width: 40, height: 40, marginLeft: 16, marginRight: 16}}/>
+             style={{width: 40, height: 40, margin: 16}}/>
         <Typography variant={"h1"}>
           Safe
         </Typography>
       </Box>
       <Box mb={6}>
-        <Typography variant={"body1"}>
+        <Typography variant={"body1"} textAlign={"center"}>
           Receive and send, blending Safe advantages and stealth privacy
         </Typography>
       </Box>
@@ -57,6 +62,15 @@ const Index: React.FC<IHome> = (props) => {
           :
           <Web3Button />
       }
+
+      <Typography variant={"h3"} mt={6}>
+        🎥 See demo
+      </Typography>
+      <iframe
+        src="https://www.loom.com/embed/13f09835a6c24caa999265a63af6ff39"
+        allowFullScreen
+        style={{ width: isMobile ? 300 : 560, height: isMobile ? 168 : 315, marginTop: theme.spacing(2) }}
+      />
 
     </Box>
   );
